@@ -17,7 +17,7 @@ fi
 FILE=$(mktemp XXXXXXX)
 rm -f "$FILE"
 
-convert "$1" -resize $(expr $(tput cols) "/" $(echo -n "$CHAR" | wc -c))\> -dither None -remap $COLOR_FILE "$FILE.txt"
+convert "$1" -resize $(expr $(tput cols) "/" $(echo -n "$CHAR" | wc -c))\> +dither -remap $COLOR_FILE "$FILE.txt"
 WIDTH=$(head -n1 "$FILE.txt" | sed -e 's/.* //g' -e 's/,.*//g')
 #COLOR=$(cat  "$FILE.txt" | sed -e 's/^\#.*//g' -e 's/.* //g' -e 's/[^a-z].*//g' | tr '\n' ' ')
 COLOR=$(cat "$FILE.txt" | sed -e '/^#/d' -e 's/^[^#]*//g' -e 's/.*none/#-/g' -e 's/ .*//g' | tr '\n' ' ')
