@@ -1,0 +1,60 @@
+#! /bin/zsh
+
+# VARIABLES
+
+COLOR_FILE=colors.png
+COLOR_CODE=colors.txt
+CHAR="  "
+#COLOR_FILE=256colors.png
+
+if [ "$1" = "" ]
+    then
+    echo "Usage $0 file"
+    exit 1
+fi
+
+# We need a tmp file to output the img data in txt format
+FILE=$(mktemp XXXXXXX)
+rm -f "$FILE"
+
+convert "$1" -resize $(expr $(tput cols) "/" $(echo -n "$CHAR" | wc -c))\> -dither None -remap $COLOR_FILE "$FILE.txt"
+WIDTH=$(head -n1 "$FILE.txt" | sed -e 's/.* //g' -e 's/,.*//g')
+#COLOR=$(cat  "$FILE.txt" | sed -e 's/^\#.*//g' -e 's/.* //g' -e 's/[^a-z].*//g' | tr '\n' ' ')
+COLOR=$(cat "$FILE.txt" | sed -e '/^#/d' -e 's/^[^#]*//g' -e 's/.*none/#-/g' -e 's/ .*//g' | tr '\n' ' ')
+
+rm -f "$FILE.txt"
+
+# Display the img
+W=0
+TXT=
+for C in $(echo $COLOR)
+    #echo "$C:"
+    do
+        # Find color index 0..255
+        if [ "$C" = "#-" ]
+        then
+            # No color
+            echo "\e[0m${CHAR}\c"
+            #TXT="$TXT\e[0m${CHAR}"
+        else
+            N=$(grep -n "$C" "$COLOR_CODE" | head -n1 | sed 's/:.*//g')
+            L=$(expr $N - 1 2>/dev/null)
+            if [ ! $? = 0 -a ! $? = 1 ]
+            then
+                echo "Cannot find color $C ..."
+                exit 1
+            else
+                echo "\e[48;05;${L}m${CHAR}\c"
+                #TXT="$TXT\e[48;05;${L}m${CHAR}"
+            fi
+        fi
+    W=$(expr $W + 1)
+    if [ $W -ge $WIDTH ]
+        then
+        # New line
+        echo "\e[0m"
+        #TXT="$TXT\e[0m\n"
+        W=0
+    fi
+done
+#echo -e "$TXT"
