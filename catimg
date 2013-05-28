@@ -34,17 +34,17 @@ for C in $(echo $COLOR)
         if [ "$C" = "#-" ]
         then
             # No color
-            echo "\e[0m${CHAR}\c"
+            echo -e "\e[0m${CHAR}\c"
             #TXT="$TXT\e[0m${CHAR}"
         else
             N=$(grep -n "$C" "$COLOR_CODE" | head -n1 | sed 's/:.*//g')
             L=$(expr $N - 1 2>/dev/null)
             if [ ! $? = 0 -a ! $? = 1 ]
             then
-                echo "Cannot find color $C ..."
+                echo -e "Cannot find color $C ..."
                 exit 1
             else
-                echo "\e[48;05;${L}m${CHAR}\c"
+                echo -e "\e[48;05;${L}m${CHAR}\c"
                 #TXT="$TXT\e[48;05;${L}m${CHAR}"
             fi
         fi
@@ -52,7 +52,7 @@ for C in $(echo $COLOR)
     if [ $W -ge $WIDTH ]
         then
         # New line
-        echo "\e[0m"
+        echo -e "\e[0m"
         #TXT="$TXT\e[0m\n"
         W=0
     fi
