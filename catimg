@@ -2,8 +2,9 @@
 
 # VARIABLES
 
-COLOR_FILE=colors.png
-COLOR_CODE=colors.txt
+DIR=$(dirname "$0")
+COLOR_FILE=$DIR/colors.png
+COLOR_CODE=$DIR/colors.txt
 CHAR="  "
 #COLOR_FILE=256colors.png
 
