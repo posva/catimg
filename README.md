@@ -11,7 +11,7 @@ Dependencies
 In order to use it you need:
 
 * ImageMagick 6.6.0-4 2012-08-17 Q16 (Not tested with earlier verisons)
-* zsh shell with 256 colors support
+* shell with 256 colors support ( __change the__ `#!/bin/zsh` __by yours__)
 
 If you have any idea of implementing a version working in bash or sh, I will really like to hear you!
 
