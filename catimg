@@ -14,6 +14,8 @@ if [ "$1" = "" ]
     exit 1
 fi
 
+source $DIR/colors.sh
+
 # We need a tmp file to output the img data in txt format
 FILE=$(mktemp XXXXXXX)
 rm -f "$FILE"
@@ -21,7 +23,7 @@ rm -f "$FILE"
 convert "$1" -resize $(expr $(tput cols) "/" $(echo -n "$CHAR" | wc -c))\> +dither -remap $COLOR_FILE "$FILE.txt"
 WIDTH=$(head -n1 "$FILE.txt" | sed -e 's/.* //g' -e 's/,.*//g')
 #COLOR=$(cat  "$FILE.txt" | sed -e 's/^\#.*//g' -e 's/.* //g' -e 's/[^a-z].*//g' | tr '\n' ' ')
-COLOR=$(cat "$FILE.txt" | sed -e '/^#/d' -e 's/^[^#]*//g' -e 's/.*none/#-/g' -e 's/ .*//g' | tr '\n' ' ')
+COLOR=$(cat "$FILE.txt" | sed -e '/^#/d' -e 's/^[^#]*#/v/g' -e 's/.*none/-/g' -e 's/ .*//g' | tr '\n' ' ')
 
 rm -f "$FILE.txt"
 
@@ -32,22 +34,14 @@ for C in $(echo $COLOR)
     #echo "$C:"
     do
         # Find color index 0..255
-        if [ "$C" = "#-" ]
+        if [ "$C" = "-" ]
         then
             # No color
             echo -e "\e[0m${CHAR}\c"
             #TXT="$TXT\e[0m${CHAR}"
         else
-            N=$(grep -n "$C" "$COLOR_CODE" | head -n1 | sed 's/:.*//g')
-            L=$(expr $N - 1 2>/dev/null)
-            if [ ! $? = 0 -a ! $? = 1 ]
-            then
-                echo -e "Cannot find color $C ..."
-                exit 1
-            else
-                echo -e "\e[48;05;${L}m${CHAR}\c"
-                #TXT="$TXT\e[48;05;${L}m${CHAR}"
-            fi
+            eval "L=${!C}"
+            echo -e "\e[48;05;${L}m${CHAR}\c"
         fi
     W=$(expr $W + 1)
     if [ $W -ge $WIDTH ]
