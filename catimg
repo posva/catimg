@@ -40,7 +40,7 @@ for C in $(echo $COLOR)
             echo -e "\e[0m${CHAR}\c"
             #TXT="$TXT\e[0m${CHAR}"
         else
-            eval "L=${!C}"
+            L="$(eval echo \$$C)"
             echo -e "\e[48;05;${L}m${CHAR}\c"
         fi
     W=$(expr $W + 1)
