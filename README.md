@@ -4,16 +4,14 @@ by Eduardo San Martin Morote aka Posva
 
 posva13@gmail.com
 
-This is a very simple script for zsh (I may add somme support for bash and sh later)
+This is a very simple script that print any image to the `stdout`.
 
 Dependencies
 ------------
 In order to use it you need:
 
 * ImageMagick 6.6.0-4 2012-08-17 Q16 (Not tested with earlier verisons)
-* shell with 256 colors support ( __change the__ `#!/bin/zsh` __by yours__)
-
-If you have any idea of implementing a version working in bash or sh, I will really like to hear you!
+* shell with 256 colors support ( __change the__ `#!/bin/bash` __by yours__). In OS X you just have to update the bash version using Homebrew (or any other method).
 
 Examples
 -------
