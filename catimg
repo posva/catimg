@@ -8,10 +8,32 @@ COLOR_CODE=$DIR/colors.txt
 CHAR="  "
 #COLOR_FILE=256colors.png
 
-if [ "$1" = "" ]
-    then
-    echo "Usage $0 file"
-    exit 1
+WIDTH=""
+QUIET=""
+IMG=""
+function help() {
+  echo "Usage catimg [-qh] [-w width] [-c char] img"
+  echo "By default char is \"  \" and w is the terminal width"
+}
+
+while getopts qw:c:h opt; do
+  case "$opt" in
+    q) QUIET="YES" ;;
+    w) WIDTH="$OPTARG" ;;
+    c) CHAR="$OPTARG" ;;
+    h) help; exit ;;
+    *) help ; exit 1;;
+  esac
+done
+
+while [ "$1" ]; do
+  IMG="$1"
+  shift
+done
+
+if [ "$IMG" = "" -o ! -f "$IMG" ]; then
+  help
+  exit 1
 fi
 
 source $DIR/colors.sh
@@ -20,8 +42,15 @@ source $DIR/colors.sh
 FILE=$(mktemp XXXXXXX)
 rm -f "$FILE"
 
-convert "$1" -resize $(expr $(tput cols) "/" $(echo -n "$CHAR" | wc -c))\> +dither -remap $COLOR_FILE "$FILE.txt"
+if [ ! "$WIDTH" ]; then
+  COLS=$(expr $(tput cols) "/" $(echo -n "$CHAR" | wc -c))
+  convert "$IMG" -resize $COLS\> +dither -remap $COLOR_FILE "$FILE.txt"
+else
+  COLS=$(expr $WIDTH "/" $(echo -n "$CHAR" | wc -c))
+  convert "$IMG" -resize $COLS\> +dither -remap $COLOR_FILE "$FILE.txt"
+fi
 WIDTH=$(head -n1 "$FILE.txt" | sed -e 's/.* //g' -e 's/,.*//g')
+
 #COLOR=$(cat  "$FILE.txt" | sed -e 's/^\#.*//g' -e 's/.* //g' -e 's/[^a-z].*//g' | tr '\n' ' ')
 COLOR=$(cat "$FILE.txt" | sed -e '/^#/d' -e 's/^[^#]*#/v/g' -e 's/.*none/-/g' -e 's/ .*//g' | tr '\n' ' ')
 
@@ -29,7 +58,7 @@ rm -f "$FILE.txt"
 
 # Display the img
 W=0
-TXT=
+TXT=""
 for C in $(echo $COLOR)
     #echo "$C:"
     do
@@ -37,19 +66,31 @@ for C in $(echo $COLOR)
         if [ "$C" = "-" ]
         then
             # No color
-            echo -e "\e[0m${CHAR}\c"
-            #TXT="$TXT\e[0m${CHAR}"
+            if [ "$QUIET" ]; then
+              TXT="$TXT\e[0m${CHAR}\c"
+            else
+              echo -e "\e[0m${CHAR}\c"
+            fi
         else
             L="$(eval echo \$$C)"
-            echo -e "\e[48;05;${L}m${CHAR}\c"
+            if [ "$QUIET" ]; then
+              TXT="$TXT\e[48;05;${L}m${CHAR}\c"
+            else
+              echo -e "\e[48;05;${L}m${CHAR}\c"
+            fi
         fi
     W=$(expr $W + 1)
     if [ $W -ge $WIDTH ]
         then
         # New line
-        echo -e "\e[0m"
-        #TXT="$TXT\e[0m\n"
+        if [ "$QUIET" ]; then
+          TXT="$TXT\e[0m\n"
+        else
+          echo -e "\e[0m"
+        fi
         W=0
     fi
 done
-#echo -e "$TXT"
+if [ "$QUIET" ]; then
+  echo -e "$TXT"
+fi
