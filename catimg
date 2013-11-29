@@ -14,6 +14,7 @@ IMG=""
 function help() {
   echo "Usage catimg [-qh] [-w width] [-c char] img"
   echo "By default char is \"  \" and w is the terminal width"
+  echo "-q stores the image into a variable and ouput when the conversion is done. CAN BE SLOWER."
 }
 
 while getopts qw:c:h opt; do
@@ -67,14 +68,14 @@ for C in $(echo $COLOR)
         then
             # No color
             if [ "$QUIET" ]; then
-              TXT="$TXT\e[0m${CHAR}\c"
+              TXT="${TXT}\e[0m${CHAR}"
             else
               echo -e "\e[0m${CHAR}\c"
             fi
         else
             L="$(eval echo \$$C)"
             if [ "$QUIET" ]; then
-              TXT="$TXT\e[48;05;${L}m${CHAR}\c"
+              TXT="${TXT}\e[48;05;${L}m${CHAR}"
             else
               echo -e "\e[48;05;${L}m${CHAR}\c"
             fi
@@ -84,7 +85,7 @@ for C in $(echo $COLOR)
         then
         # New line
         if [ "$QUIET" ]; then
-          TXT="$TXT\e[0m\n"
+          TXT="${TXT}\e[0m\n"
         else
           echo -e "\e[0m"
         fi
