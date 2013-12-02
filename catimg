@@ -9,17 +9,14 @@ CHAR="  "
 #COLOR_FILE=256colors.png
 
 WIDTH=""
-QUIET=""
 IMG=""
 function help() {
-  echo "Usage catimg [-qh] [-w width] [-c char] img"
+  echo "Usage catimg [-h] [-w width] [-c char] img"
   echo "By default char is \"  \" and w is the terminal width"
-  echo "-q stores the image into a variable and ouput when the conversion is done. CAN BE SLOWER."
 }
 
 while getopts qw:c:h opt; do
   case "$opt" in
-    q) QUIET="YES" ;;
     w) WIDTH="$OPTARG" ;;
     c) CHAR="$OPTARG" ;;
     h) help; exit ;;
@@ -37,61 +34,49 @@ if [ "$IMG" = "" -o ! -f "$IMG" ]; then
   exit 1
 fi
 
-source $DIR/colors.sh
-
-# We need a tmp file to output the img data in txt format
-FILE=$(mktemp XXXXXXX)
-rm -f "$FILE"
-
 if [ ! "$WIDTH" ]; then
   COLS=$(expr $(tput cols) "/" $(echo -n "$CHAR" | wc -c))
-  convert "$IMG" -resize $COLS\> +dither -remap $COLOR_FILE "$FILE.txt"
 else
   COLS=$(expr $WIDTH "/" $(echo -n "$CHAR" | wc -c))
-  convert "$IMG" -resize $COLS\> +dither -remap $COLOR_FILE "$FILE.txt"
 fi
-WIDTH=$(head -n1 "$FILE.txt" | sed -e 's/.* //g' -e 's/,.*//g')
+WIDTH=$(convert ${IMG} -print "%w\n" /dev/null)
+if [ "$WIDTH" -gt "$COLS" ]; then
+  WIDTH=$COLS
+fi
 
-#COLOR=$(cat  "$FILE.txt" | sed -e 's/^\#.*//g' -e 's/.* //g' -e 's/[^a-z].*//g' | tr '\n' ' ')
-COLOR=$(cat "$FILE.txt" | sed -e '/^#/d' -e 's/^[^#]*#/v/g' -e 's/.*none/-/g' -e 's/ .*//g' | tr '\n' ' ')
+REMAP=""
+if convert "$IMG" -resize $COLS\> +dither -remap $COLOR_FILE /dev/null 2>/dev/null ; then
+  REMAP="-remap $COLOR_FILE"
+fi
 
-rm -f "$FILE.txt"
-
-# Display the img
+# Display the image
 W=0
 TXT=""
-for C in $(echo $COLOR)
-    #echo "$C:"
-    do
-        # Find color index 0..255
-        if [ "$C" = "-" ]
-        then
-            # No color
-            if [ "$QUIET" ]; then
-              TXT="${TXT}\e[0m${CHAR}"
-            else
-              echo -e "\e[0m${CHAR}\c"
-            fi
-        else
-            L="$(eval echo \$$C)"
-            if [ "$QUIET" ]; then
-              TXT="${TXT}\e[48;05;${L}m${CHAR}"
-            else
-              echo -e "\e[48;05;${L}m${CHAR}\c"
-            fi
-        fi
-    W=$(expr $W + 1)
-    if [ $W -ge $WIDTH ]
-        then
-        # New line
-        if [ "$QUIET" ]; then
-          TXT="${TXT}\e[0m\n"
-        else
-          echo -e "\e[0m"
-        fi
-        W=0
+convert "$IMG" -resize $COLS\> +dither $REMAP txt:- 2>/dev/null |
+sed -e 's/.*none.*/NO NO NO/g' -e '1d;s/^.*(\(.*\)[,)].*$/\1/g;y/,/ /' |
+while read R G B _; do
+  if [ ! "$R" = "NO" ]; then
+    if [ "$R" -eq "$G" -a "$G" -eq "$B" ]; then
+      ((
+      I++,
+      IDX = 232 + R * 23 / 255
+      ))
+    else
+      ((
+      I++,
+      IDX = 16
+      + R * 5 / 255 * 36
+      + G * 5 / 255 * 6
+      + B * 5 / 255
+      ))
     fi
+    #echo "$R,$G,$B: $IDX"
+    echo -ne "\x1b[48;5;${IDX}m${CHAR}"
+  else
+    (( I++ ))
+    echo -ne "\x1b[0m${CHAR}"
+  fi
+  # New lines
+  (( $I % $WIDTH )) || echo -e "\x1b[0m"
 done
-if [ "$QUIET" ]; then
-  echo -e "$TXT"
-fi
+
