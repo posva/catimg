@@ -47,6 +47,10 @@ fi
 REMAP=""
 if convert "$IMG" -resize $COLS\> +dither -remap $COLOR_FILE /dev/null 2>/dev/null ; then
   REMAP="-remap $COLOR_FILE"
+else
+  echo "The version of convert is too old, don't expect good results :(" >&2
+  #convert "$IMG" -colors 256 PNG8:tmp.png
+  #IMG="tmp.png"
 fi
 
 # Display the image
