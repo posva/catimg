@@ -1,19 +1,25 @@
-#! /bin/bash
+#!/bin/bash
 
-# VARIABLES
+################################################################################
+# catimg script by Eduardo San Martin Morote aka Posva                         #
+# http://posva.net                                                             #
+#                                                                              #
+# Ouput the content of an image to the stdout using the 256 colors of the      #
+# terminal.                                                                    #
+# Github: https://github.com/posva/catimg                                      #
+################################################################################
 
-DIR=$(dirname "$0")
-COLOR_FILE=$DIR/colors.png
-COLOR_CODE=$DIR/colors.txt
-CHAR="  "
-#COLOR_FILE=256colors.png
-
-WIDTH=""
-IMG=""
 function help() {
   echo "Usage catimg [-h] [-w width] [-c char] img"
   echo "By default char is \"  \" and w is the terminal width"
 }
+
+# VARIABLES
+COLOR_FILE=$(dirname $0)/colors.png
+CHAR="  "
+
+WIDTH=""
+IMG=""
 
 while getopts qw:c:h opt; do
   case "$opt" in
@@ -21,8 +27,8 @@ while getopts qw:c:h opt; do
     c) CHAR="$OPTARG" ;;
     h) help; exit ;;
     *) help ; exit 1;;
-  esac
-done
+    esac
+  done
 
 while [ "$1" ]; do
   IMG="$1"
@@ -45,7 +51,7 @@ if [ "$WIDTH" -gt "$COLS" ]; then
 fi
 
 REMAP=""
-if convert "$IMG" -resize $COLS\> +dither -remap $COLOR_FILE /dev/null 2>/dev/null ; then
+if convert "$IMG" -resize $COLS\> +dither -remap $COLOR_FILE /dev/null ; then
   REMAP="-remap $COLOR_FILE"
 else
   echo "The version of convert is too old, don't expect good results :(" >&2
@@ -54,11 +60,9 @@ else
 fi
 
 # Display the image
-W=0
-TXT=""
-convert "$IMG" -resize $COLS\> +dither $REMAP txt:- 2>/dev/null |
+convert "$IMG" -resize $COLS\> +dither $REMAP txt:- |
 sed -e 's/.*none.*/NO NO NO/g' -e '1d;s/^.*(\(.*\)[,)].*$/\1/g;y/,/ /' |
-while read R G B _; do
+while read R G B f; do
   if [ ! "$R" = "NO" ]; then
     if [ "$R" -eq "$G" -a "$G" -eq "$B" ]; then
       ((
@@ -75,12 +79,11 @@ while read R G B _; do
       ))
     fi
     #echo "$R,$G,$B: $IDX"
-    echo -ne "\x1b[48;5;${IDX}m${CHAR}"
+    echo -ne "\e[48;5;${IDX}m${CHAR}"
   else
     (( I++ ))
-    echo -ne "\x1b[0m${CHAR}"
+    echo -ne "\e[0m${CHAR}"
   fi
   # New lines
-  (( $I % $WIDTH )) || echo -e "\x1b[0m"
+  (( $I % $WIDTH )) || echo -e "\e[0m"
 done
-
