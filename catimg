@@ -1,4 +1,4 @@
-#!/bin/bash
+#! /bin/bash
 
 ################################################################################
 # catimg script by Eduardo San Martin Morote aka Posva                         #
@@ -60,7 +60,7 @@ else
 fi
 
 # Display the image
-convert "$IMG" -resize $COLS\> +dither $REMAP txt:- |
+convert "$IMG" -resize $COLS\> +dither `echo $REMAP` txt:- |
 sed -e 's/.*none.*/NO NO NO/g' -e '1d;s/^.*(\(.*\)[,)].*$/\1/g;y/,/ /' |
 while read R G B f; do
   if [ ! "$R" = "NO" ]; then
