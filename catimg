@@ -21,7 +21,7 @@ CHAR="  "
 WIDTH=""
 IMG=""
 
-while getopts qw:c:h opt; do
+while getopts w:c:h opt; do
   case "$opt" in
     w) WIDTH="$OPTARG" ;;
     c) CHAR="$OPTARG" ;;
@@ -83,8 +83,8 @@ while read R G B f; do
     echo -ne "\e[48;5;${IDX}m${CHAR}"
   else
     (( I++ ))
-    echo -ne "\e[0m${CHAR}"
+    echo -ne "\e[m${CHAR}"
   fi
   # New lines
-  (( $I % $WIDTH )) || echo -e "\e[0m"
+  (( $I % $WIDTH )) || echo -e "\e[m"
 done
