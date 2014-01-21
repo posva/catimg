@@ -80,11 +80,11 @@ while read R G B f; do
       ))
     fi
     #echo "$R,$G,$B: $IDX"
-    echo -ne "\e[48;5;${IDX}m${CHAR}"
+    echo -n "[48;5;${IDX}m${CHAR}"
   else
     (( I++ ))
-    echo -ne "\e[m${CHAR}"
+    echo -n "[m${CHAR}"
   fi
   # New lines
-  (( $I % $WIDTH )) || echo -e "\e[m"
+  (( $I % $WIDTH )) || echo "[m"
 done
