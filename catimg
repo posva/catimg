@@ -15,7 +15,7 @@ function help() {
 }
 
 # VARIABLES
-COLOR_FILE=$(dirname $0)/colors.png
+COLOR_FILE=$(dirname "$0")/colors.png
 CHAR="  "
 
 WIDTH=""
@@ -41,9 +41,9 @@ if [ "$IMG" = "" -o ! -f "$IMG" ]; then
 fi
 
 if [ ! "$WIDTH" ]; then
-  COLS=$(expr $(tput cols) "/" $(echo -n "$CHAR" | wc -c))
+  (( COLS = $(tput cols) / $(echo -n "$CHAR" | wc -c) ))
 else
-  COLS=$(expr $WIDTH "/" $(echo -n "$CHAR" | wc -c))
+  (( COLS = WIDTH / $(echo -n "$CHAR" | wc -c) ))
 fi
 WIDTH=$(convert "$IMG" -print "%w\n" /dev/null)
 if [ "$WIDTH" -gt "$COLS" ]; then
@@ -51,12 +51,10 @@ if [ "$WIDTH" -gt "$COLS" ]; then
 fi
 
 REMAP=""
-if convert "$IMG" -resize $COLS\> +dither -remap $COLOR_FILE /dev/null ; then
-  REMAP="-remap $COLOR_FILE"
+if convert "$IMG" -resize "${COLS}>" +dither -remap "${COLOR_FILE}" /dev/null ; then
+  REMAP="-remap ${COLOR_FILE}"
 else
   echo "The version of convert is too old, don't expect good results :(" >&2
-  #convert "$IMG" -colors 256 PNG8:tmp.png
-  #IMG="tmp.png"
 fi
 
 # Display the image
@@ -64,13 +62,18 @@ I=0
 convert "$IMG" -resize $COLS\> +dither `echo $REMAP` txt:- |
 sed -e 's/.*none.*/NO NO NO/g' -e '1d;s/^.*(\(.*\)[,)].*$/\1/g;y/,/ /' |
 while read R G B f; do
-  if [ ! "$R" = "NO" ]; then
+  if [ "$R" = "#" ]; then
+    (( I++ ))
+    echo -en "\033[${I}A" # Move up the cursor
+    I=0
+  elif [ ! "$R" = "NO" ]; then
     if [ "$R" -eq "$G" -a "$G" -eq "$B" ]; then
       ((
       I++,
       IDX = 232 + R * 23 / 255
       ))
     else
+      # the * 36 at the end is intended, it gives better results
       ((
       I++,
       IDX = 16
@@ -86,5 +89,5 @@ while read R G B f; do
     echo -n "[m${CHAR}"
   fi
   # New lines
-  (( $I % $WIDTH )) || echo "[m"
+  (( I % WIDTH )) || echo "[m"
 done
