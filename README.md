@@ -5,11 +5,11 @@ by Eduardo San Martin Morote aka Posva
 posva13@gmail.com
 
 This is a very simple script that print any image to the `stdout` using colors.
-There's also a C version included with no dependencies. To compile it do:
+There's also a C version included with no dependencies. You can install it easily:
 
 ```
 cmake .
-make
+make install
 ```
 
 Script Dependencies
