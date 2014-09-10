@@ -24,6 +24,8 @@ add_executable(
   ${source_files}
   )
 
+install(TARGETS catimg
+  RUNTIME DESTINATION bin)
 
 # libs
 target_link_libraries(catimg m)
