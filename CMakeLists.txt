@@ -26,6 +26,10 @@ add_executable(
 
 install(TARGETS catimg
   RUNTIME DESTINATION bin)
+install(FILES catimg
+  RENAME catimg-ext
+  PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+  DESTINATION bin)
 
 # libs
 target_link_libraries(catimg m)
