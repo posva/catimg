@@ -15,7 +15,7 @@ help() {
 }
 
 # VARIABLES
-COLOR_FILE=$(dirname "$0")/colors.png
+COLOR_FILE=$(dirname "$0")/catimg-ext-colors.png
 CHAR="  "
 
 WIDTH=""
