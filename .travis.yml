@@ -1,0 +1,8 @@
+language: c
+compiler:
+  - gcc
+  - clang
+script:
+  - rm -rf build
+  - mkdir -p build && cd build
+  - cmake .. && make
