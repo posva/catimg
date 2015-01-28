@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.6)
 project(catimg)
 
+find_package(ImageMagick COMPONENTS MagickWand convert)
+
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
 # set soem options
@@ -11,12 +13,20 @@ set(CMAKE_BUILD_TYPE Release)
 set(SRC ${PROJECT_SOURCE_DIR}/src)
 
 # Include dir for the exc
-include_directories(${SRC})
+include_directories(${SRC} ${ImageMagick_INCLUDE_DIRS})
 
 set(EXECUTABLE_OUTPUT_PATH bin)
 
 # find files
 file(GLOB_RECURSE source_files ${SRC}/*)
+
+if((${ImageMagick_FOUND} MATCHES TRUE) AND
+  (${ImageMagick_VERSION_STRING} VERSION_GREATER "6.6.0"))
+  list(REMOVE_ITEM source_files ${SRC}/catimg.c)
+else()
+  list(REMOVE_ITEM source_files ${SRC}/magic.c)
+  message("INFO: ImageMagick not found, falling back to basic solution")
+endif()
 
 # catimg executable
 add_executable(
@@ -36,7 +46,7 @@ install(FILES catimg-ext-colors.png
 
 
 # libs
-target_link_libraries(catimg m)
+target_link_libraries(catimg m ${ImageMagick_LIBRARIES})
 
 # tests
 #enable_testing()
