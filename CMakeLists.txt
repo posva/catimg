@@ -7,7 +7,7 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
 # set soem options
 #set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall -Wextra -std=c99 -g")
-set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Wall -Wextra -Os -std=c99")
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Wall -Wextra -Os -g -std=c99")
 set(CMAKE_BUILD_TYPE Release)
 
 set(SRC ${PROJECT_SOURCE_DIR}/src)
@@ -22,7 +22,8 @@ file(GLOB_RECURSE source_files ${SRC}/*)
 
 if((${ImageMagick_FOUND} MATCHES TRUE) AND
   (${ImageMagick_VERSION_STRING} VERSION_GREATER "6.6.0"))
-  list(REMOVE_ITEM source_files ${SRC}/catimg.c)
+  #list(REMOVE_ITEM source_files ${SRC}/catimg.c)
+  set(source_files ${SRC}/magic.c)
 else()
   list(REMOVE_ITEM source_files ${SRC}/magic.c)
   message("INFO: ImageMagick not found, falling back to basic solution")
