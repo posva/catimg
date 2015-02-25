@@ -15,12 +15,15 @@ set(SRC ${PROJECT_SOURCE_DIR}/src)
 # Include dir for the exc
 include_directories(${SRC} ${ImageMagick_INCLUDE_DIRS})
 
+set(USE_MAGICK "TRUE" CACHE FILEPATH "Use MagickWand if available")
+
 set(EXECUTABLE_OUTPUT_PATH bin)
 
 # find files
 file(GLOB_RECURSE source_files ${SRC}/*)
 
-if((${ImageMagick_FOUND} MATCHES TRUE) AND
+if((${USE_MAGICK} MATCHES TRUE) AND
+  (${ImageMagick_FOUND} MATCHES TRUE) AND
   (${ImageMagick_VERSION_STRING} VERSION_GREATER "6.6.0"))
   #list(REMOVE_ITEM source_files ${SRC}/catimg.c)
   set(source_files ${SRC}/magic.c)

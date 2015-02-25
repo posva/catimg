@@ -5,10 +5,19 @@ by Eduardo San Martin Morote aka Posva
 posva13@gmail.com
 
 This is a very simple script that print any image to the `stdout` using colors.
-There's also a C version included with no dependencies. You can install it easily:
+There are two C versions:
+
+* One with no dependencies
+* One using `MagickWand` to convert colors (more accurate) and loading images (more formats)
+
+If `MagickWand` is available it is used otherwise the no-deps version is built. You can
+force to build the no-deps version by passing `-DUSE_MAGICK=FALSE` to `cmake`.
+
+To build simply do
 
 ```
-cmake .
+mkdir build && cd build
+cmake ..
 make install
 ```
 
