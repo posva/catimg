@@ -172,6 +172,7 @@ void img_load_from_file(image_t *img, const char* file)
                 stbi_image_free(ptr);
         } else {
                 perror("stb_image error");
+                exit(1);
         }
 }
 
