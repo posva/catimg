@@ -38,14 +38,15 @@
  * @{
  */
 
-
 /**
  * @brief Structure to handle images
  */
 typedef struct {
         color_t *pixels; ///< 1 dim pixels pixels[x+y*w]
         uint32_t width, ///< Width of the image
-                 height; ///< Height of the image
+                 height, ///< Height of the image
+                 frames; ///< Number of frames
+        uint16_t *delays; ///< Array of delays. Length = frames - 1
 } image_t;
 
 /**
