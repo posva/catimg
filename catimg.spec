@@ -5,7 +5,7 @@ Summary: Print images in a terminal with 256 colors support
 
 
 Group:   Applications/Multimedia
-License: Unknown
+License: MIT
 
 URL:     https://github.com/posva/catimg
 Source0: https://github.com/posva/%{name}/archive/%{version}.tar.gz#/%{name}-%{version}.tar.gz
