@@ -1,7 +1,11 @@
 Catimg
 ======
 
-Little program written in C with no dependencies that prints images in terminal.
+Renders images in the terminal.
+
+![Sonic](https://cloud.githubusercontent.com/assets/664177/10122399/7ff610ba-6518-11e5-8c2c-994149a89d69.png)
+
+`catimg` is a little program written in C with no dependencies that prints images in terminal.
 It supports JPEG, PNG and GIF formats. This program was originally a script that
 did the same by using ImageMagick `convert`.
 
@@ -22,10 +26,11 @@ In order to use the script you need:
     yours__). In OS X you just have to update the bash version using
     [Homebrew](http://brew.sh/) (or any other method).
 
-Examples --------
+Examples
+--------
 
-![Mario](http://i.imgur.com/Nt38dja.png) ![Nyan
-Cat](http://i.imgur.com/sgy81sI.png)
+![pikachu gif](https://cloud.githubusercontent.com/assets/664177/10122393/6846151e-6518-11e5-9a21-9be0c0765267.gif)
+![cats](https://cloud.githubusercontent.com/assets/664177/10122420/9c2764d6-6519-11e5-8c76-e1636afec60f.png)
 
 Differences between Script and C version
 ----------------------------------------
