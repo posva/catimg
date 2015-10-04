@@ -9,6 +9,16 @@ Renders images in the terminal.
 It supports JPEG, PNG and GIF formats. This program was originally a script that
 did the same by using ImageMagick `convert`.
 
+Installation
+------------
+
+Homebrew
+```
+brew tap posva/taps
+brew update
+brew install catimg
+```
+
 Building
 --------
 
