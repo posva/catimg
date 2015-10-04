@@ -1,5 +1,5 @@
 Name:    catimg
-Version: 2.1
+Version: 2.2
 Release: 1%{?dist}
 Summary: Print images in a terminal with 256 colors support
 
@@ -38,5 +38,6 @@ make %{?_smp_mflags}
 
 
 %changelog
+* Sun Oct 04 2015  Eduardo San Martin Morote <i@posva.net> - 2.2
 * Fri Sep 18 2015 Mike Gerber <mike@sprachgewalt.de> - 2.0-1
 - Initial spec file
