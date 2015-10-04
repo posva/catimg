@@ -3,7 +3,7 @@ Catimg
 
 Renders images in the terminal.
 
-![Sonic](https://cloud.githubusercontent.com/assets/664177/10122399/7ff610ba-6518-11e5-8c2c-994149a89d69.png)
+![mewtwo](https://cloud.githubusercontent.com/assets/664177/10267523/f81296de-6a97-11e5-99d0-d2124bd6a9e3.png)
 
 `catimg` is a little program written in C with no dependencies that prints images in terminal.
 It supports JPEG, PNG and GIF formats. This program was originally a script that
@@ -30,7 +30,12 @@ Examples
 --------
 
 ![pikachu gif](https://cloud.githubusercontent.com/assets/664177/10122393/6846151e-6518-11e5-9a21-9be0c0765267.gif)
-![cats](https://cloud.githubusercontent.com/assets/664177/10122420/9c2764d6-6519-11e5-8c76-e1636afec60f.png)
+
+##High Resolution vs Low Resolution
+By using unicode characters catimg will try to display pictures in higher resolution. You can force the resolution with the `-r` option.
+
+![cats](https://cloud.githubusercontent.com/assets/664177/10267481/da74d106-6a96-11e5-937d-efd452e53170.png)
+![catslow](https://cloud.githubusercontent.com/assets/664177/10267494/07464a48-6a97-11e5-813e-0645f56b4c4f.png)
 
 Differences between Script and C version
 ----------------------------------------
