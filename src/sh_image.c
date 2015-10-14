@@ -23,8 +23,7 @@ STBIDEF unsigned char *stbi_xload(char const *filename, int *x, int *y, int *fra
 
         stbi__start_file(&s, f);
 
-        if (stbi__gif_test(&s))
-        {
+        if (stbi__gif_test(&s)) {
                 stbi__gif g;
                 gif_result head;
                 gif_result *prev = 0, *gr = &head;
@@ -34,10 +33,8 @@ STBIDEF unsigned char *stbi_xload(char const *filename, int *x, int *y, int *fra
 
                 *frames = 0;
 
-                while (gr->data = stbi__gif_load_next(&s, &g, channels, 4))
-                {
-                        if (gr->data == (unsigned char*)&s)
-                        {
+                while ((gr->data = stbi__gif_load_next(&s, &g, channels, 4))) {
+                        if (gr->data == (unsigned char*)&s) {
                                 gr->data = 0;
                                 break;
                         }
@@ -53,16 +50,14 @@ STBIDEF unsigned char *stbi_xload(char const *filename, int *x, int *y, int *fra
                 if (gr != &head)
                         STBI_FREE(gr);
 
-                if (*frames > 0)
-                {
+                if (*frames > 0) {
                         *x = g.w;
                         *y = g.h;
                 }
 
                 result = head.data;
 
-                if (*frames > 1)
-                {
+                if (*frames > 1) {
                         unsigned int size = 4 * g.w * g.h;
                         unsigned char *p = 0;
 
@@ -70,8 +65,7 @@ STBIDEF unsigned char *stbi_xload(char const *filename, int *x, int *y, int *fra
                         gr = &head;
                         p = result;
 
-                        while (gr)
-                        {
+                        while (gr) {
                                 prev = gr;
                                 memcpy(p, gr->data, size);
                                 p += size;
@@ -83,9 +77,7 @@ STBIDEF unsigned char *stbi_xload(char const *filename, int *x, int *y, int *fra
                                 if (prev != &head) STBI_FREE(prev);
                         }
                 }
-        }
-        else
-        {
+        } else {
                 result = stbi__load_main(&s, x, y, channels, 0);
                 *frames = !!result;
         }
@@ -142,7 +134,7 @@ void img_load_from_file(image_t *img, const char* file)
                 }
 
                 // fill the array
-                void (*pixelSetter)(color_t *pixel, unsigned char* ptr);
+                void (*pixelSetter)(color_t *pixel, unsigned char* ptr) = &setPixelGray;
                 switch (channels) {
                         case 1:
                                 pixelSetter = &setPixelGray;

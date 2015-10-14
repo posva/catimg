@@ -40,7 +40,9 @@ char supportsUTF8() {
         const char* LANG = getenv("LANG");
         const char* LC_CTYPE = getenv("LC_CTYPE");
         const char* UTF = "UTF-8";
-        return strstr(LC_ALL, UTF) || strstr(LANG, UTF) || strstr(LC_CTYPE, UTF);
+        return (LC_ALL && strstr(LC_ALL, UTF))
+                || (LANG && strstr(LANG, UTF))
+                || (LC_CTYPE && strstr(LC_CTYPE, UTF));
 }
 
 int main(int argc, char *argv[])
@@ -81,7 +83,7 @@ int main(int argc, char *argv[])
         }
 
         if (precision == 0 || precision > 2) {
-               if (supportsUTF8)
+               if (supportsUTF8())
                        precision = 2;
                else
                        precision = 1;
