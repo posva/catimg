@@ -14,8 +14,6 @@ Installation
 
 Homebrew
 ```
-brew tap posva/taps
-brew update
 brew install catimg
 ```
 
