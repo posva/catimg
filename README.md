@@ -16,6 +16,10 @@ Homebrew
 ```
 brew install catimg
 ```
+archlinux
+```
+yaourt -S catimg
+```
 
 Building
 --------
