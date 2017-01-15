@@ -16,9 +16,13 @@ Homebrew
 ```
 brew install catimg
 ```
-archlinux
+Arch Linux
 ```
 yaourt -S catimg
+```
+Fedora 25 and later
+```
+dnf -y install catimg
 ```
 
 Building
