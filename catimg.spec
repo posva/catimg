@@ -7,7 +7,7 @@ License:        MIT
 URL:            https://github.com/posva/catimg
 Source0:        https://github.com/posva/%{name}/archive/v%{version}/%{name}-%{version}.tar.gz
 
-BuildRequires:  cmake
+BuildRequires:  cmake >= 2.8
 BuildRequires:  gcc
 
 %description
@@ -20,7 +20,9 @@ images in terminal. It supports JPEG, PNG and GIF formats.
 %build
 mkdir -p build
 pushd build
-%cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
+%cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+       -DMAN_OUTPUT_PATH=%{_mandir}/man1 \
+       ..
 %make_build
 popd
 
