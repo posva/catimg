@@ -1,5 +1,5 @@
 Name:           catimg
-Version:        2.2.1
+Version:        2.2.2
 Release:        1%{?dist}
 Summary:        Print images in a terminal with 256 colors support
 
@@ -33,5 +33,6 @@ popd
 %license LICENSE
 %doc README.md
 %{_bindir}/%{name}
+%{_mandir}/man1/%{name}.1*
 
 %changelog

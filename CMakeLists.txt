@@ -31,6 +31,10 @@ install(TARGETS catimg
 # libs
 target_link_libraries(catimg m)
 
+# man page
+install(FILES ${PROJECT_SOURCE_DIR}/man/catimg.1
+  DESTINATION share/man/man1)
+
 # tests
 #enable_testing()
 #add_test(tcatimg ${PROJECT_SOURCE_DIR}/tests/tcatimg.sh)
