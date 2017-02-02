@@ -36,7 +36,7 @@ install(TARGETS catimg
 
 # man page
 install(FILES ${PROJECT_SOURCE_DIR}/man/catimg.1
-  DESTINATION ${INSTALL_MAN})
+  RUNTIME DESTINATION share/man/man1)
 
 # libs
 target_link_libraries(catimg m)
