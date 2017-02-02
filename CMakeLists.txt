@@ -3,10 +3,8 @@ project(catimg)
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
-if (DEFINED ENV{man1})
-  set(INSTALL_MAN $ENV{man1})
-else()
-  set(INSTALL_MAN "/share/man/man1")
+if (NOT MAN_OUTPUT_PATH)
+  set(MAN_OUTPUT_PATH "/share/man/man1")
 endif()
 
 # set some options
@@ -36,7 +34,7 @@ install(TARGETS catimg
 
 # man page
 install(FILES ${PROJECT_SOURCE_DIR}/man/catimg.1
-  RUNTIME DESTINATION share/man/man1)
+  DESTINATION ${MAN_OUTPUT_PATH})
 
 # libs
 target_link_libraries(catimg m)
