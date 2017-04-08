@@ -96,7 +96,8 @@ int main(int argc, char *argv[])
         float sc = cols/(float)img.width;
         img_resize(&img, sc, sc);
     }
-    img_convert_colors(&img);
+    if (precision == 1)
+        img_convert_colors(&img);
     /*printf("Loaded %s: %ux%u. Console width: %u\n", file, img.width, img.height, cols);*/
     // For GIF
     if (img.frames > 1) {
