@@ -133,13 +133,13 @@ int main(int argc, char *argv[])
                                 if (lowerPixel->a < TRANSP_ALPHA)
                                     printf("\e[m ");
                                 else
-                                    printf("\x1b[38;2;%d;%d;%dm\u2584",
+                                    printf("\x1b[0;38;2;%d;%d;%dm\u2584",
                                            lowerPixel->r, lowerPixel->g, lowerPixel->b
                                            );
                                     // printf("\e[0;38;5;%um\u2584", bgCol);
                             } else {
                                 if (lowerPixel->a < TRANSP_ALPHA)
-                                    printf("\x1b[38;2;%d;%d;%dm\u2580",
+                                    printf("\x1b[0;38;2;%d;%d;%dm\u2580",
                                            upperPixel->r, upperPixel->g, upperPixel->b
                                            );
                                          // printf("\e[0;38;5;%um\u2580", fgCol);
@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
                             if (upperPixel->a < TRANSP_ALPHA)
                                 printf("\e[m ");
                             else
-                              printf("\x1b[38;2;%d;%d;%dm\u2580",
+                              printf("\x1b[0;38;2;%d;%d;%dm\u2580",
                                      upperPixel->r, upperPixel->g, upperPixel->b
                                      );
                             // printf("\e[38;5;%um\u2580", fgCol);
