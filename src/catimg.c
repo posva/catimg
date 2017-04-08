@@ -121,14 +121,12 @@ int main(int argc, char *argv[])
             for (y = 0; y < img.height; y += precision) {
                 for (x = 0; x < img.width; x++) {
                     index = y * img.width + x + offset;
-                    uint32_t fgCol = pixelToInt(&img.pixels[index]);
                     const color_t* upperPixel = &img.pixels[index];
                     if (precision == 2) {
                         if (y < img.height - 1) {
                             const color_t* lowerPixel = &img.pixels[index + img.width];
-                            uint32_t bgCol = pixelToInt(&img.pixels[index + img.width]);
-                            if (fgCol == 0xffff) { // first pixel is transparent
-                                if (bgCol == 0xffff)
+                            if (!upperPixel->a) { // first pixel is transparent
+                                if (!lowerPixel->a)
                                     printf("\e[m ");
                                 else
                                     printf("\x1b[38;2;%d;%d;%dm\u2584",
@@ -136,7 +134,7 @@ int main(int argc, char *argv[])
                                            );
                                     // printf("\e[0;38;5;%um\u2584", bgCol);
                             } else {
-                                if (bgCol == 0xffff)
+                                if (!lowerPixel->a)
                                     printf("\x1b[38;2;%d;%d;%dm\u2580",
                                            upperPixel->r, upperPixel->g, upperPixel->b
                                            );
@@ -150,7 +148,7 @@ int main(int argc, char *argv[])
                                     /* printf("\e[38;5;%u;48;5;%um\u2580", fgCol, bgCol); */
                             }
                         } else { // this is the last line
-                            if (fgCol == 0xffff)
+                            if (!upperPixel->a)
                                 printf("\e[m ");
                             else
                               printf("\x1b[38;2;%d;%d;%dm\u2580",
@@ -159,6 +157,7 @@ int main(int argc, char *argv[])
                             // printf("\e[38;5;%um\u2580", fgCol);
                         }
                     } else {
+                        uint32_t fgCol = pixelToInt(upperPixel);
                         if (fgCol == 0xffff)
                             printf("\e[m  ");
                         else
