@@ -4858,6 +4858,8 @@ static stbi_uc *stbi__ico_load(stbi__context *s, int *x, int *y, int *comp, int 
        return stbi__errpuc("not ICO", "Corrupt ICO");
    stbi__get32le(s); // discard size
    offset = stbi__get32le(s);
+   if (!n && bpp == 8)
+       n = 256; // Fixes loading of some ICO files.
    stbi__skip(s, offset - 22);
    hsz = stbi__get32le(s);
    if (hsz != 0x474e5089)
