@@ -4822,7 +4822,7 @@ static int stbi__ico_test_raw(stbi__context *s)
    if (stbi__get8(s) != 0) return 0;
 
    bpp = stbi__get8(s); // accept only common bit depths
-   if (bpp != 1 && bpp != 2 && bpp != 4 && bpp != 8 && bpp != 16 && bpp != 24 && bpp != 32) return 0;
+   if (bpp != 0 && bpp != 1 && bpp != 2 && bpp != 4 && bpp != 8 && bpp != 16 && bpp != 24 && bpp != 32) return 0;
    if (stbi__get8(s) != 0) return 0;
 
    return 1;
@@ -4854,6 +4854,7 @@ static stbi_uc *stbi__ico_load(stbi__context *s, int *x, int *y, int *comp, int 
    planes = stbi__get16le(s);
    if (planes > 1) return stbi__errpuc("not ICO", "Corrupt ICO");
    bpp = stbi__get16le(s);
+   if (bpp == 0) bpp = 8; // Some ICO files have 0 bpp!
    if (bpp != 1 && bpp != 2 && bpp != 4 && bpp != 8 && bpp != 16 && bpp != 24 && bpp != 32)
        return stbi__errpuc("not ICO", "Corrupt ICO");
    stbi__get32le(s); // discard size
@@ -6161,7 +6162,8 @@ static int stbi__ico_info(stbi__context *s, int *x, int *y, int *comp)
        stbi__rewind( s );
        return 0;
    }
-   *comp = stbi__get8(s) / 8;
+   n = stbi__get8(s);
+   *comp = n ? n / 8 : 1;
    return 1;
 }
 #endif
