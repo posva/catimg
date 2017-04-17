@@ -85,6 +85,7 @@
             STBI_NO_GIF
             STBI_NO_HDR
             STBI_NO_PIC
+            STBI_NO_ICO
             STBI_NO_PNM   (.ppm and .pgm)
 
       - You can request *only* certain decoders and suppress all other ones
@@ -99,6 +100,7 @@
             STBI_ONLY_GIF
             STBI_ONLY_HDR
             STBI_ONLY_PIC
+            STBI_ONLY_ICO
             STBI_ONLY_PNM   (.ppm and .pgm)
 
          Note that you can define multiples of these, and you will get all
@@ -522,7 +524,7 @@ STBIDEF int   stbi_zlib_decode_noheader_buffer(char *obuffer, int olen, const ch
 #if defined(STBI_ONLY_JPEG) || defined(STBI_ONLY_PNG) || defined(STBI_ONLY_BMP) \
   || defined(STBI_ONLY_TGA) || defined(STBI_ONLY_GIF) || defined(STBI_ONLY_PSD) \
   || defined(STBI_ONLY_HDR) || defined(STBI_ONLY_PIC) || defined(STBI_ONLY_PNM) \
-  || defined(STBI_ONLY_ZLIB)
+  || defined(STBI_ONLY_ZLIB) || defined(STBI_ONLY_ICO)
    #ifndef STBI_ONLY_JPEG
    #define STBI_NO_JPEG
    #endif
@@ -549,6 +551,9 @@ STBIDEF int   stbi_zlib_decode_noheader_buffer(char *obuffer, int olen, const ch
    #endif
    #ifndef STBI_ONLY_PNM
    #define STBI_NO_PNM
+   #endif
+   #ifndef STBI_ONLY_ICO
+   #define STBI_NO_ICO
    #endif
 #endif
 
@@ -828,6 +833,12 @@ static stbi_uc *stbi__png_load(stbi__context *s, int *x, int *y, int *comp, int 
 static int      stbi__png_info(stbi__context *s, int *x, int *y, int *comp);
 #endif
 
+#ifndef STBI_NO_ICO
+static int      stbi__ico_test(stbi__context *s);
+static stbi_uc *stbi__ico_load(stbi__context *s, int *x, int *y, int *comp, int req_comp);
+static int      stbi__ico_info(stbi__context *s, int *x, int *y, int *comp);
+#endif
+
 #ifndef STBI_NO_BMP
 static int      stbi__bmp_test(stbi__context *s);
 static stbi_uc *stbi__bmp_load(stbi__context *s, int *x, int *y, int *comp, int req_comp);
@@ -946,6 +957,9 @@ static unsigned char *stbi__load_main(stbi__context *s, int *x, int *y, int *com
    #endif
    #ifndef STBI_NO_PNM
    if (stbi__pnm_test(s))  return stbi__pnm_load(s,x,y,comp,req_comp);
+   #endif
+   #ifndef STBI_NO_ICO
+   if (stbi__ico_test(s))  return stbi__ico_load(s,x,y,comp,req_comp);
    #endif
 
    #ifndef STBI_NO_HDR
@@ -4511,7 +4525,7 @@ static int stbi__png_info(stbi__context *s, int *x, int *y, int *comp)
 
 // Microsoft/Windows BMP image
 
-#ifndef STBI_NO_BMP
+#ifndef STBI_NO_BMP && STBI_NO_ICO
 static int stbi__bmp_test_raw(stbi__context *s)
 {
    int r;
@@ -4575,19 +4589,14 @@ static int stbi__shiftsigned(int v, int shift, int bits)
    return result;
 }
 
-static stbi_uc *stbi__bmp_load(stbi__context *s, int *x, int *y, int *comp, int req_comp)
+static stbi_uc *stbi__bmp_load_cont(stbi__context *s, int *x, int *y, int *comp, int req_comp, int offset,
+                                    int hsz, int true_y)
 {
    stbi_uc *out;
    unsigned int mr=0,mg=0,mb=0,ma=0, fake_a=0;
    stbi_uc pal[256][4];
    int psize=0,i,j,compress=0,width;
-   int bpp, flip_vertically, pad, target, offset, hsz;
-   if (stbi__get8(s) != 'B' || stbi__get8(s) != 'M') return stbi__errpuc("not BMP", "Corrupt BMP");
-   stbi__get32le(s); // discard filesize
-   stbi__get16le(s); // discard reserved
-   stbi__get16le(s); // discard reserved
-   offset = stbi__get32le(s);
-   hsz = stbi__get32le(s);
+   int bpp, flip_vertically, pad, target;
    if (hsz != 12 && hsz != 40 && hsz != 56 && hsz != 108 && hsz != 124) return stbi__errpuc("unknown BMP", "BMP type not supported: unknown");
    if (hsz == 12) {
       s->img_x = stbi__get16le(s);
@@ -4670,6 +4679,8 @@ static stbi_uc *stbi__bmp_load(stbi__context *s, int *x, int *y, int *comp, int 
       target = req_comp;
    else
       target = s->img_n; // if they want monochrome, we'll post-convert
+   if (true_y)
+       s->img_y = true_y;
    out = (stbi_uc *) stbi__malloc(target * s->img_x * s->img_y);
    if (!out) return stbi__errpuc("outofmem", "Out of memory");
    if (bpp < 16) {
@@ -4776,6 +4787,91 @@ static stbi_uc *stbi__bmp_load(stbi__context *s, int *x, int *y, int *comp, int 
    if (comp) *comp = s->img_n;
    return out;
 }
+
+static stbi_uc *stbi__bmp_load(stbi__context *s, int *x, int *y, int *comp, int req_comp)
+{
+   int offset, hsz;
+   if (stbi__get8(s) != 'B' || stbi__get8(s) != 'M') return stbi__errpuc("not BMP", "Corrupt BMP");
+   stbi__get32le(s); // discard filesize
+   stbi__get16le(s); // discard reserved
+   stbi__get16le(s); // discard reserved
+   offset = stbi__get32le(s);
+   hsz = stbi__get32le(s);
+   return stbi__bmp_load_cont(s, x, y, comp, req_comp, offset, hsz, 0);
+}
+#endif
+
+// Microsoft/Windows ICO image
+
+#ifndef STBI_NO_ICO
+static int stbi__ico_test_raw(stbi__context *s)
+{
+   int bpp;
+   if (stbi__get8(s) != 0) return 0;
+   if (stbi__get8(s) != 0) return 0;
+   if (stbi__get8(s) != 1) return 0;
+   if (stbi__get8(s) != 0) return 0;
+   if (stbi__get8(s) == 0) return 0; // accept any "number of images" from 1 to 255,
+   if (stbi__get8(s) != 0) return 0; // so the MSB needs to be 0.
+
+   stbi__get8(s); // discard width
+   stbi__get8(s); // discard height
+   stbi__get8(s); // discard number of pallete entries
+   if (stbi__get8(s) != 0) return 0;
+   if (stbi__get8(s) > 1) return 0;
+   if (stbi__get8(s) != 0) return 0;
+
+   bpp = stbi__get8(s); // accept only common bit depths
+   if (bpp != 1 && bpp != 2 && bpp != 4 && bpp != 8 && bpp != 16 && bpp != 24 && bpp != 32) return 0;
+   if (stbi__get8(s) != 0) return 0;
+
+   return 1;
+}
+
+static int stbi__ico_test(stbi__context *s)
+{
+   int r = stbi__ico_test_raw(s);
+   stbi__rewind(s);
+   return r;
+}
+
+static stbi_uc *stbi__ico_load(stbi__context *s, int *x, int *y, int *comp, int req_comp)
+{
+   int n, planes, bpp, offset, hsz;
+
+   n = stbi__get32le(s);
+   if (n == 0x00020000) return stbi__errpuc("not ICO", "Unsupported CURsor file");
+   if (n != 0x00010000) return stbi__errpuc("not ICO", "Corrupt ICO");
+   n = stbi__get16le(s);
+   if (n < 0 || n > 255) return stbi__errpuc("not ICO", "Corrupt ICO");
+
+   s->img_x = stbi__get8(s);
+   s->img_y = stbi__get8(s);
+   if (!s->img_x) s->img_x = 256;
+   if (!s->img_y) s->img_y = 256;
+   n = stbi__get16le(s); // number of pallete entries
+   if (n == 1) return stbi__errpuc("not ICO", "Corrupt ICO");
+   planes = stbi__get16le(s);
+   if (planes > 1) return stbi__errpuc("not ICO", "Corrupt ICO");
+   bpp = stbi__get16le(s);
+   if (bpp != 1 && bpp != 2 && bpp != 4 && bpp != 8 && bpp != 16 && bpp != 24 && bpp != 32)
+       return stbi__errpuc("not ICO", "Corrupt ICO");
+   stbi__get32le(s); // discard size
+   offset = stbi__get32le(s);
+   stbi__skip(s, offset - 22);
+   hsz = stbi__get32le(s);
+   if (hsz != 0x474e5089)
+       return stbi__bmp_load_cont(s, x, y, comp, req_comp, n * 4 + 14 + hsz, hsz, s->img_y);
+#ifndef STBI_NO_PNG
+   // Rewind and go to PNG start again
+   stbi__rewind(s);
+   stbi__skip(s, offset);
+   return stbi__png_load(s, x, y, comp, req_comp);
+#else
+   return stbi__errpuc("PNG", "PNG support not compiled");
+#endif
+}
+
 #endif
 
 // Targa Truevision - TGA
@@ -6042,6 +6138,32 @@ static int stbi__bmp_info(stbi__context *s, int *x, int *y, int *comp)
 }
 #endif
 
+#ifndef STBI_NO_ICO
+static int stbi__ico_info(stbi__context *s, int *x, int *y, int *comp)
+{
+   unsigned r, n;
+   r = stbi__get32le(s);
+   n = stbi__get16le(s);
+   if (n != 0x00010000 || n < 1 || n > 255 ) {
+       stbi__rewind( s );
+       return 0;
+   }
+   *x = stbi__get8(s);
+   *y = stbi__get8(s);
+   if (!*x) *x = 256;
+   if (!*y) *y = 256;
+
+   r = stbi__get8(s);
+   n = stbi__get16le(s);
+   if (r != 0 || n > 1 ) {
+       stbi__rewind( s );
+       return 0;
+   }
+   *comp = stbi__get8(s) / 8;
+   return 1;
+}
+#endif
+
 #ifndef STBI_NO_PSD
 static int stbi__psd_info(stbi__context *s, int *x, int *y, int *comp)
 {
@@ -6247,6 +6369,10 @@ static int stbi__info_main(stbi__context *s, int *x, int *y, int *comp)
 
    #ifndef STBI_NO_BMP
    if (stbi__bmp_info(s, x, y, comp))  return 1;
+   #endif
+
+   #ifndef STBI_NO_ICO
+   if (stbi__ico_info(s, x, y, comp))  return 1;
    #endif
 
    #ifndef STBI_NO_PSD
