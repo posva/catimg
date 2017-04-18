@@ -1,5 +1,5 @@
 Name:           catimg
-Version:        2.2.2
+Version:        2.3.0
 Release:        1%{?dist}
 Summary:        Print images in a terminal with 256 colors support
 
@@ -12,7 +12,7 @@ BuildRequires:  gcc
 
 %description
 %{name} is a little program written in C with no dependencies that prints
-images in terminal. It supports JPEG, PNG and GIF formats.
+images in terminal. It supports JPEG, PNG, ICO and GIF formats.
 
 %prep
 %autosetup
