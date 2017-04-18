@@ -7,6 +7,9 @@
 #include <signal.h>
 #define USAGE printf("Usage catimg [-h] [-w width] [-l loops] [-r resolution] img\nBy default w is the terminal width.\nLoops are only useful with GIF. A value of 1 means that the GIF will be displayed twice. A negative value means infinite looping.\nResolution must be 1 or 2. By default catimg checks for unicode support to use higher resolution\n")
 
+// Transparency threshold -- all pixels with alpha below 25%.
+#define TRANSP_ALPHA 64
+
 extern char *optarg;
 extern int optind;
 extern int optopt;
@@ -121,44 +124,44 @@ int main(int argc, char *argv[])
             for (y = 0; y < img.height; y += precision) {
                 for (x = 0; x < img.width; x++) {
                     index = y * img.width + x + offset;
-                    uint32_t fgCol = pixelToInt(&img.pixels[index]);
                     const color_t* upperPixel = &img.pixels[index];
                     if (precision == 2) {
                         if (y < img.height - 1) {
                             const color_t* lowerPixel = &img.pixels[index + img.width];
-                            uint32_t bgCol = pixelToInt(&img.pixels[index + img.width]);
-                            if (fgCol == 0xffff) { // first pixel is transparent
-                                if (bgCol == 0xffff)
+                            /* uint32_t bgCol = pixelToInt(&img.pixels[index + img.width]); */
+                            if (upperPixel->a < TRANSP_ALPHA) { // first pixel is transparent
+                                if (lowerPixel->a < TRANSP_ALPHA)
                                     printf("\e[m ");
                                 else
-                                    printf("\x1b[38;2;%d;%d;%dm\u2580",
+                                    printf("\x1b[0;38;2;%d;%d;%dm\u2584",
                                            lowerPixel->r, lowerPixel->g, lowerPixel->b
                                            );
-                                    // printf("\e[0;38;5;%um\u2584", bgCol);
+                                    /* printf("\e[0;38;5;%um\u2584", bgCol); */
                             } else {
-                                if (bgCol == 0xffff)
-                                    printf("\x1b[48;2;%d;%d;%dm\u2580",
+                                if (lowerPixel->a < TRANSP_ALPHA)
+                                    /* printf("\e[0;38;5;%um\u2580", fgCol); */
+                                    printf("\x1b[0;38;2;%d;%d;%dm\u2580",
                                            upperPixel->r, upperPixel->g, upperPixel->b
                                            );
-                                         // printf("\e[0;38;5;%um\u2580", fgCol);
                                 else
+                                    /* printf("\e[38;5;%u;48;5;%um\u2580", fgCol, bgCol); */
                                     printf("\x1b[48;2;%d;%d;%dm\x1b[38;2;%d;%d;%dm\u2584",
                                            upperPixel->r, upperPixel->g, upperPixel->b,
                                            lowerPixel->r, lowerPixel->g, lowerPixel->b
                                            );
 
-                                    /* printf("\e[38;5;%u;48;5;%um\u2580", fgCol, bgCol); */
                             }
                         } else { // this is the last line
-                            if (fgCol == 0xffff)
+                            if (upperPixel->a < TRANSP_ALPHA)
                                 printf("\e[m ");
                             else
-                              printf("\x1b[48;2;%d;%d;%dm\u2580",
-                                     upperPixel->r, upperPixel->g, upperPixel->b
-                                     );
-                            // printf("\e[38;5;%um\u2580", fgCol);
+                                printf("\x1b[0;38;2;%d;%d;%dm\u2580",
+                                       upperPixel->r, upperPixel->g, upperPixel->b
+                                       );
+                                /* printf("\e[38;5;%um\u2580", fgCol); */
                         }
                     } else {
+                        uint32_t fgCol = pixelToInt(&img.pixels[index]);
                         if (fgCol == 0xffff)
                             printf("\e[m  ");
                         else
