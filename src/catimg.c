@@ -67,7 +67,8 @@ int main(int argc, char *argv[])
     opterr = 0;
 
     uint32_t cols = 0, precision = 0;
-    while ((c = getopt (argc, argv, "w:l:r:h")) != -1)
+    uint8_t convert = 0;
+    while ((c = getopt (argc, argv, "w:l:r:hc")) != -1)
         switch (c) {
             case 'w':
                 cols = strtol(optarg, &num, 0) >> 1;
@@ -81,6 +82,10 @@ int main(int argc, char *argv[])
             case 'h':
                 printf(USAGE);
                 exit(0);
+                break;
+            case 'c':
+              convert = 1;
+              break;
             default:
                 printf(USAGE);
                 exit(1);
@@ -108,7 +113,8 @@ int main(int argc, char *argv[])
         float sc = cols/(float)img.width;
         img_resize(&img, sc, sc);
     }
-    /* img_convert_colors(&img); */
+    if (convert)
+        img_convert_colors(&img);
     /*printf("Loaded %s: %ux%u. Console width: %u\n", file, img.width, img.height, cols);*/
     // For GIF
     if (img.frames > 1) {
