@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
         float sc = cols/(float)img.width;
         img_resize(&img, sc, sc);
     }
-    img_convert_colors(&img);
+    /* img_convert_colors(&img); */
     /*printf("Loaded %s: %ux%u. Console width: %u\n", file, img.width, img.height, cols);*/
     // For GIF
     if (img.frames > 1) {
@@ -161,11 +161,13 @@ int main(int argc, char *argv[])
                                 /* printf("\e[38;5;%um\u2580", fgCol); */
                         }
                     } else {
-                        uint32_t fgCol = pixelToInt(&img.pixels[index]);
-                        if (fgCol == 0xffff)
+                        if (img.pixels[index].a < TRANSP_ALPHA)
                             printf("\e[m  ");
                         else
-                            printf("\e[48;5;%um  ", fgCol);
+                          printf("\x1b[0;48;2;%d;%d;%dm  ",
+                                 img.pixels[index].r, img.pixels[index].g, img.pixels[index].b
+                                 );
+                            /* printf("\e[48;5;%um  ", fgCol); */
                     }
                 }
                 printf("\e[m\n");
