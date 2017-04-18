@@ -5,7 +5,16 @@
 #include "sh_utils.h"
 #include <unistd.h>
 #include <signal.h>
-#define USAGE printf("Usage catimg [-h] [-w width] [-l loops] [-r resolution] img\nBy default w is the terminal width.\nLoops are only useful with GIF. A value of 1 means that the GIF will be displayed twice. A negative value means infinite looping.\nResolution must be 1 or 2. By default catimg checks for unicode support to use higher resolution\n")
+
+#define USAGE "Usage: catimg [-h] [-w width] [-l loops] [-r resolution] image-file\n\n" \
+  "  -h: Displays this message\n"                                      \
+  "  -w: Terminal width by default\n"                           \
+  "  -l: Loops are only useful with GIF files. A value of 1 means that the GIF will " \
+  "be displayed twice because it loops once. A negative value means infinite " \
+  "looping\n"                                                           \
+  "  -r: Resolution must be 1 or 2. By default catimg checks for unicode support to " \
+  "use higher resolution\n" \
+  "  -c: Convert colors to a restricted palette\n"
 
 // Transparency threshold -- all pixels with alpha below 25%.
 #define TRANSP_ALPHA 64
@@ -70,10 +79,10 @@ int main(int argc, char *argv[])
                 precision = strtol(optarg, &num, 0);
                 break;
             case 'h':
-                USAGE;
+                printf(USAGE);
                 exit(0);
             default:
-                USAGE;
+                printf(USAGE);
                 exit(1);
                 break;
         }
@@ -81,7 +90,7 @@ int main(int argc, char *argv[])
     if (argc > 1)
         file = argv[argc-1];
     else {
-        USAGE;
+        printf(USAGE);
         exit(1);
     }
 
