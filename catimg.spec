@@ -1,5 +1,5 @@
 Name:           catimg
-Version:        2.3.0
+Version:        2.3.2
 Release:        1%{?dist}
 Summary:        Print images in a terminal with 256 colors support
 
