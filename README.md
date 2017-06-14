@@ -47,7 +47,7 @@ Examples
 
 ![pikachu gif](https://cloud.githubusercontent.com/assets/664177/10122393/6846151e-6518-11e5-9a21-9be0c0765267.gif)
 
-##High Resolution vs Low Resolution
+## High Resolution vs Low Resolution
 By using unicode characters catimg will try to display pictures in higher resolution. You can force the resolution with the `-r` option.
 
 ![cats](https://cloud.githubusercontent.com/assets/664177/10267481/da74d106-6a96-11e5-937d-efd452e53170.png)
