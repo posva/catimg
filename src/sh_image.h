@@ -58,6 +58,13 @@ typedef struct {
 void img_load_from_file(image_t *img, const char* file);
 
 /**
+ * @brief Load an image from stdin
+ *
+ * @param img instance
+ */
+void img_load_from_stdin(image_t *img);
+
+/**
  * @brief Init a transparent picture
  *
  * @param img instance

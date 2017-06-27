@@ -31,5 +31,13 @@
  * @return the number of columns
  */
 uint32_t terminal_columns();
+
+/**
+ * @brief Read binary data from stdin
+ * @param ptr Address to the ptr which will be filled with the data
+ * @return number of bytes read
+ */
+uint32_t read_stdin(unsigned char **ptr);
+
 ///@}
 #endif
