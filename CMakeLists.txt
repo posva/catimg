@@ -4,7 +4,7 @@ project(catimg)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
 if (NOT MAN_OUTPUT_PATH)
-  set(MAN_OUTPUT_PATH "usr/share/man/man1")
+  set(MAN_OUTPUT_PATH "share/man/man1")
 endif()
 
 # set some options
