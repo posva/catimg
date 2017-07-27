@@ -4525,7 +4525,7 @@ static int stbi__png_info(stbi__context *s, int *x, int *y, int *comp)
 
 // Microsoft/Windows BMP image
 
-#ifndef STBI_NO_BMP && STBI_NO_ICO
+#if !defined(STBI_NO_BMP) && !defined(STBI_NO_ICO)
 static int stbi__bmp_test_raw(stbi__context *s)
 {
    int r;

@@ -108,7 +108,12 @@ int main(int argc, char *argv[])
 
     if (cols < 1) // if precision is 2 we can use the terminal full width. Otherwise we can only use half
         cols = terminal_columns() / (2 / precision);
-    img_load_from_file(&img, file);
+
+    if (strcmp(file, "-") == 0) {
+        img_load_from_stdin(&img);
+    } else {
+        img_load_from_file(&img, file);
+    }
     if (cols < img.width) {
         float sc = cols/(float)img.width;
         img_resize(&img, sc, sc);
