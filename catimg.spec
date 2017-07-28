@@ -31,10 +31,15 @@ pushd build
 %make_install
 popd
 
+install -D -p -m 644 completion/_catimg $RPM_BUILD_ROOT%{_datadir}/zsh/site-functions/_catimg
+
 %files
 %license LICENSE
 %doc README.md
 %{_bindir}/%{name}
+%dir %{_datadir}/zsh
+%dir %{_datadir}/zsh/site-functions
+%{_datadir}/zsh/site-functions/_catimg
 %{_mandir}/man1/%{name}.1*
 
 %changelog
