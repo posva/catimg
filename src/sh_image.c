@@ -24,7 +24,7 @@ STBIDEF unsigned char *stbi__xload_main(stbi__context *s, int *x, int *y, int *f
 
                 *frames = 0;
 
-                while ((gr->data = stbi__gif_load_next(s, &g, channels, 4))) {
+                while ((gr->data = stbi__gif_load_next(s, &g, channels, 4, 0))) {
                         if (gr->data == (unsigned char*)s) {
                                 gr->data = 0;
                                 break;
@@ -69,7 +69,8 @@ STBIDEF unsigned char *stbi__xload_main(stbi__context *s, int *x, int *y, int *f
                         }
                 }
         } else {
-                result = stbi__load_main(s, x, y, channels, 0);
+                stbi__result_info ri;
+                result = stbi__load_main(s, x, y, channels, 0, &ri, 8);
                 *frames = !!result;
         }
 
