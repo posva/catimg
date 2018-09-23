@@ -19,12 +19,16 @@ STBIDEF unsigned char *stbi__xload_main(stbi__context *s, int *x, int *y, int *f
                 gif_result head;
                 gif_result *prev = 0, *gr = &head;
 
+                stbi_uc *out = 0;
+                stbi_uc *two_back = 0;
+                int stride;
+
                 memset(&g, 0, sizeof(g));
                 memset(&head, 0, sizeof(head));
 
                 *frames = 0;
 
-                while ((gr->data = stbi__gif_load_next(s, &g, channels, 4, 0))) {
+                while ((gr->data = stbi__gif_load_next(s, &g, channels, 4, two_back))) {
                         if (gr->data == (unsigned char*)s) {
                                 gr->data = 0;
                                 break;
@@ -36,7 +40,21 @@ STBIDEF unsigned char *stbi__xload_main(stbi__context *s, int *x, int *y, int *f
                         gr = (gif_result*) stbi__malloc(sizeof(gif_result));
                         memset(gr, 0, sizeof(gif_result));
                         ++(*frames);
+
+                        stride = g.w * g.h * 4;
+
+                        if (out) {
+                          out = (stbi_uc*) STBI_REALLOC( out, (*frames) * stride );
+                        } else {
+                          out = (stbi_uc*)stbi__malloc( (*frames) * stride );
+                        }
+
+                        if (*frames >= 2) {
+                          two_back = out - 2 * stride;
+                        }
                 }
+
+                STBI_FREE(out);
 
                 if (gr != &head)
                         STBI_FREE(gr);
