@@ -282,6 +282,7 @@ RECENT REVISION HISTORY:
 //        STBI_NO_GIF
 //        STBI_NO_HDR
 //        STBI_NO_PIC
+//        STBI_NO_ICO
 //        STBI_NO_PNM   (.ppm and .pgm)
 //
 //  - You can request *only* certain decoders and suppress all other ones
@@ -296,6 +297,7 @@ RECENT REVISION HISTORY:
 //        STBI_ONLY_GIF
 //        STBI_ONLY_HDR
 //        STBI_ONLY_PIC
+//        STBI_ONLY_ICO
 //        STBI_ONLY_PNM   (.ppm and .pgm)
 //
 //   - If you use STBI_NO_PNG (or _ONLY_ without PNG), and you still
@@ -471,7 +473,7 @@ STBIDEF int   stbi_zlib_decode_noheader_buffer(char *obuffer, int olen, const ch
 #if defined(STBI_ONLY_JPEG) || defined(STBI_ONLY_PNG) || defined(STBI_ONLY_BMP) \
   || defined(STBI_ONLY_TGA) || defined(STBI_ONLY_GIF) || defined(STBI_ONLY_PSD) \
   || defined(STBI_ONLY_HDR) || defined(STBI_ONLY_PIC) || defined(STBI_ONLY_PNM) \
-  || defined(STBI_ONLY_ZLIB)
+  || defined(STBI_ONLY_ZLIB) || defined(STBI_ONLY_ICO)
    #ifndef STBI_ONLY_JPEG
    #define STBI_NO_JPEG
    #endif
@@ -498,6 +500,9 @@ STBIDEF int   stbi_zlib_decode_noheader_buffer(char *obuffer, int olen, const ch
    #endif
    #ifndef STBI_ONLY_PNM
    #define STBI_NO_PNM
+   #endif
+   #ifndef STBI_ONLY_ICO
+   #define STBI_NO_ICO
    #endif
 #endif
 
@@ -796,6 +801,13 @@ static int      stbi__png_info(stbi__context *s, int *x, int *y, int *comp);
 static int      stbi__png_is16(stbi__context *s);
 #endif
 
+#ifndef STBI_NO_ICO
+static int      stbi__ico_test(stbi__context *s);
+static void    *stbi__ico_load(stbi__context *s, int *x, int *y, int *comp, int req_comp, stbi__result_info *ri);
+static int      stbi__ico_info(stbi__context *s, int *x, int *y, int *comp);
+#endif
+
+
 #ifndef STBI_NO_BMP
 static int      stbi__bmp_test(stbi__context *s);
 static void    *stbi__bmp_load(stbi__context *s, int *x, int *y, int *comp, int req_comp, stbi__result_info *ri);
@@ -996,6 +1008,9 @@ static void *stbi__load_main(stbi__context *s, int *x, int *y, int *comp, int re
    #endif
    #ifndef STBI_NO_PNM
    if (stbi__pnm_test(s))  return stbi__pnm_load(s,x,y,comp,req_comp, ri);
+   #endif
+   #ifndef STBI_NO_ICO
+   if (stbi__ico_test(s))  return stbi__ico_load(s,x,y,comp,req_comp, ri);
    #endif
 
    #ifndef STBI_NO_HDR
@@ -4980,7 +4995,7 @@ static int stbi__png_is16(stbi__context *s)
 
 // Microsoft/Windows BMP image
 
-#ifndef STBI_NO_BMP
+#if !defined(STBI_NO_BMP) && !defined(STBI_NO_ICO)
 static int stbi__bmp_test_raw(stbi__context *s)
 {
    int r;
@@ -5056,17 +5071,9 @@ typedef struct
    unsigned int mr,mg,mb,ma, all_a;
 } stbi__bmp_data;
 
-static void *stbi__bmp_parse_header(stbi__context *s, stbi__bmp_data *info)
-{
-   int hsz;
-   if (stbi__get8(s) != 'B' || stbi__get8(s) != 'M') return stbi__errpuc("not BMP", "Corrupt BMP");
-   stbi__get32le(s); // discard filesize
-   stbi__get16le(s); // discard reserved
-   stbi__get16le(s); // discard reserved
-   info->offset = stbi__get32le(s);
-   info->hsz = hsz = stbi__get32le(s);
-   info->mr = info->mg = info->mb = info->ma = 0;
 
+static void *stbi__bmp_parse_header_cont(stbi__context *s, stbi__bmp_data *info) {
+   int hsz = info->hsz;
    if (hsz != 12 && hsz != 40 && hsz != 56 && hsz != 108 && hsz != 124) return stbi__errpuc("unknown BMP", "BMP type not supported: unknown");
    if (hsz == 12) {
       s->img_x = stbi__get16le(s);
@@ -5139,36 +5146,47 @@ static void *stbi__bmp_parse_header(stbi__context *s, stbi__bmp_data *info)
    return (void *) 1;
 }
 
+static void *stbi__bmp_parse_header(stbi__context *s, stbi__bmp_data *info)
+{
+   int hsz;
+   if (stbi__get8(s) != 'B' || stbi__get8(s) != 'M') return stbi__errpuc("not BMP", "Corrupt BMP");
+   stbi__get32le(s); // discard filesize
+   stbi__get16le(s); // discard reserved
+   stbi__get16le(s); // discard reserved
+   info->offset = stbi__get32le(s);
+   info->hsz = hsz = stbi__get32le(s);
+   info->mr = info->mg = info->mb = info->ma = 0;
 
-static void *stbi__bmp_load(stbi__context *s, int *x, int *y, int *comp, int req_comp, stbi__result_info *ri)
+   return stbi__bmp_parse_header_cont(s, info);
+}
+
+
+
+static void *stbi__bmp_load_cont(stbi__context *s, int *x, int *y, int *comp, int req_comp, stbi__bmp_data *info, stbi__result_info *ri)
 {
    stbi_uc *out;
    unsigned int mr=0,mg=0,mb=0,ma=0, all_a;
    stbi_uc pal[256][4];
    int psize=0,i,j,width;
    int flip_vertically, pad, target;
-   stbi__bmp_data info;
-   STBI_NOTUSED(ri);
 
-   info.all_a = 255;
-   if (stbi__bmp_parse_header(s, &info) == NULL)
-      return NULL; // error code already set
+   STBI_NOTUSED(ri);
 
    flip_vertically = ((int) s->img_y) > 0;
    s->img_y = abs((int) s->img_y);
 
-   mr = info.mr;
-   mg = info.mg;
-   mb = info.mb;
-   ma = info.ma;
-   all_a = info.all_a;
+   mr = info->mr;
+   mg = info->mg;
+   mb = info->mb;
+   ma = info->ma;
+   all_a = info->all_a;
 
-   if (info.hsz == 12) {
-      if (info.bpp < 24)
-         psize = (info.offset - 14 - 24) / 3;
+   if (info->hsz == 12) {
+      if (info->bpp < 24)
+         psize = (info->offset - 14 - 24) / 3;
    } else {
-      if (info.bpp < 16)
-         psize = (info.offset - 14 - info.hsz) >> 2;
+      if (info->bpp < 16)
+         psize = (info->offset - 14 - info->hsz) >> 2;
    }
 
    s->img_n = ma ? 4 : 3;
@@ -5183,23 +5201,23 @@ static void *stbi__bmp_load(stbi__context *s, int *x, int *y, int *comp, int req
 
    out = (stbi_uc *) stbi__malloc_mad3(target, s->img_x, s->img_y, 0);
    if (!out) return stbi__errpuc("outofmem", "Out of memory");
-   if (info.bpp < 16) {
+   if (info->bpp < 16) {
       int z=0;
       if (psize == 0 || psize > 256) { STBI_FREE(out); return stbi__errpuc("invalid", "Corrupt BMP"); }
       for (i=0; i < psize; ++i) {
          pal[i][2] = stbi__get8(s);
          pal[i][1] = stbi__get8(s);
          pal[i][0] = stbi__get8(s);
-         if (info.hsz != 12) stbi__get8(s);
+         if (info->hsz != 12) stbi__get8(s);
          pal[i][3] = 255;
       }
-      stbi__skip(s, info.offset - 14 - info.hsz - psize * (info.hsz == 12 ? 3 : 4));
-      if (info.bpp == 1) width = (s->img_x + 7) >> 3;
-      else if (info.bpp == 4) width = (s->img_x + 1) >> 1;
-      else if (info.bpp == 8) width = s->img_x;
+      stbi__skip(s, info->offset - 14 - info->hsz - psize * (info->hsz == 12 ? 3 : 4));
+      if (info->bpp == 1) width = (s->img_x + 7) >> 3;
+      else if (info->bpp == 4) width = (s->img_x + 1) >> 1;
+      else if (info->bpp == 8) width = s->img_x;
       else { STBI_FREE(out); return stbi__errpuc("bad bpp", "Corrupt BMP"); }
       pad = (-width)&3;
-      if (info.bpp == 1) {
+      if (info->bpp == 1) {
          for (j=0; j < (int) s->img_y; ++j) {
             int bit_offset = 7, v = stbi__get8(s);
             for (i=0; i < (int) s->img_x; ++i) {
@@ -5218,7 +5236,7 @@ static void *stbi__bmp_load(stbi__context *s, int *x, int *y, int *comp, int req
          for (j=0; j < (int) s->img_y; ++j) {
             for (i=0; i < (int) s->img_x; i += 2) {
                int v=stbi__get8(s),v2=0;
-               if (info.bpp == 4) {
+               if (info->bpp == 4) {
                   v2 = v & 15;
                   v >>= 4;
                }
@@ -5227,7 +5245,7 @@ static void *stbi__bmp_load(stbi__context *s, int *x, int *y, int *comp, int req
                out[z++] = pal[v][2];
                if (target == 4) out[z++] = 255;
                if (i+1 == (int) s->img_x) break;
-               v = (info.bpp == 8) ? stbi__get8(s) : v2;
+               v = (info->bpp == 8) ? stbi__get8(s) : v2;
                out[z++] = pal[v][0];
                out[z++] = pal[v][1];
                out[z++] = pal[v][2];
@@ -5240,14 +5258,14 @@ static void *stbi__bmp_load(stbi__context *s, int *x, int *y, int *comp, int req
       int rshift=0,gshift=0,bshift=0,ashift=0,rcount=0,gcount=0,bcount=0,acount=0;
       int z = 0;
       int easy=0;
-      stbi__skip(s, info.offset - 14 - info.hsz);
-      if (info.bpp == 24) width = 3 * s->img_x;
-      else if (info.bpp == 16) width = 2*s->img_x;
+      stbi__skip(s, info->offset - 14 - info->hsz);
+      if (info->bpp == 24) width = 3 * s->img_x;
+      else if (info->bpp == 16) width = 2*s->img_x;
       else /* bpp = 32 and pad = 0 */ width=0;
       pad = (-width) & 3;
-      if (info.bpp == 24) {
+      if (info->bpp == 24) {
          easy = 1;
-      } else if (info.bpp == 32) {
+      } else if (info->bpp == 32) {
          if (mb == 0xff && mg == 0xff00 && mr == 0x00ff0000 && ma == 0xff000000)
             easy = 2;
       }
@@ -5272,7 +5290,7 @@ static void *stbi__bmp_load(stbi__context *s, int *x, int *y, int *comp, int req
                if (target == 4) out[z++] = a;
             }
          } else {
-            int bpp = info.bpp;
+            int bpp = info->bpp;
             for (i=0; i < (int) s->img_x; ++i) {
                stbi__uint32 v = (bpp == 16 ? (stbi__uint32) stbi__get16le(s) : stbi__get32le(s));
                unsigned int a;
@@ -5313,6 +5331,120 @@ static void *stbi__bmp_load(stbi__context *s, int *x, int *y, int *comp, int req
    *y = s->img_y;
    if (comp) *comp = s->img_n;
    return out;
+}
+
+static void *stbi__bmp_load(stbi__context *s, int *x, int *y, int *comp, int req_comp, stbi__result_info *ri)
+{
+   stbi__bmp_data info;
+   info.all_a = 255;
+   if (stbi__bmp_parse_header(s, &info) == NULL)
+      return NULL; // error code already set
+
+   return stbi__bmp_load_cont(s, x, y, comp, req_comp, &info, ri);
+}
+#endif
+
+
+// Microsoft/Windows ICO image
+#ifndef STBI_NO_ICO
+static int stbi__ico_test_raw(stbi__context *s)
+{
+   int bpp;
+   if (stbi__get8(s) != 0) return 0;
+   if (stbi__get8(s) != 0) return 0;
+   if (stbi__get8(s) != 1) return 0;
+   if (stbi__get8(s) != 0) return 0;
+   if (stbi__get8(s) == 0) return 0; // accept any "number of images" from 1 to 255,
+   if (stbi__get8(s) != 0) return 0; // so the MSB needs to be 0.
+   stbi__get8(s); // discard width
+   stbi__get8(s); // discard height
+   stbi__get8(s); // discard number of pallete entries
+   if (stbi__get8(s) != 0) return 0;
+   if (stbi__get8(s) > 1) return 0;
+   if (stbi__get8(s) != 0) return 0;
+   bpp = stbi__get8(s); // accept only common bit depths
+   if (bpp != 1 && bpp != 2 && bpp != 4 && bpp != 8 && bpp != 16 && bpp != 24 && bpp != 32) return 0;
+   if (stbi__get8(s) != 0) return 0;
+   return 1;
+}
+static int stbi__ico_test(stbi__context *s)
+{
+   int r = stbi__ico_test_raw(s);
+   stbi__rewind(s);
+   return r;
+}
+static void *stbi__ico_load(stbi__context *s, int *x, int *y, int *comp, int req_comp, stbi__result_info *ri)
+{
+   int n, planes, bpp, offset, hsz;
+   n = stbi__get32le(s);
+   if (n == 0x00020000) return stbi__errpuc("not ICO", "Unsupported CURsor file");
+   if (n != 0x00010000) return stbi__errpuc("not ICO", "Corrupt ICO");
+   n = stbi__get16le(s);
+   if (n < 0 || n > 255) return stbi__errpuc("not ICO", "Corrupt ICO");
+   s->img_x = stbi__get8(s);
+   s->img_y = stbi__get8(s);
+   if (!s->img_x) s->img_x = 256;
+   if (!s->img_y) s->img_y = 256;
+   n = stbi__get16le(s); // number of pallete entries
+   if (n == 1) return stbi__errpuc("not ICO", "Corrupt ICO");
+   planes = stbi__get16le(s);
+   if (planes > 1) return stbi__errpuc("not ICO", "Corrupt ICO");
+   bpp = stbi__get16le(s);
+   if (bpp != 1 && bpp != 2 && bpp != 4 && bpp != 8 && bpp != 16 && bpp != 24 && bpp != 32)
+       return stbi__errpuc("not ICO", "Corrupt ICO");
+   stbi__get32le(s); // discard size
+   offset = stbi__get32le(s);
+   stbi__skip(s, offset - 22);
+   hsz = stbi__get32le(s);
+
+   if (hsz != 0x474e5089) {
+     stbi__bmp_data info;
+     info.all_a = 255;
+     info.offset = n * 4 + 14 + hsz;
+     info.hsz = hsz;
+     info.mr = info.mg = info.mb = info.ma = 0;
+     int true_y = s->img_y; // save before parse head
+     if (stbi__bmp_parse_header_cont(s, &info) == NULL)
+       return NULL; // error code already set
+
+     s->img_y = true_y;
+     return stbi__bmp_load_cont(s, x, y, comp, req_comp, &info, ri);
+   }
+#ifndef STBI_NO_PNG
+   // Rewind and go to PNG start again
+   stbi__rewind(s);
+   stbi__skip(s, offset);
+   return stbi__png_load(s, x, y, comp, req_comp, ri);
+#else
+   return stbi__errpuc("PNG", "PNG support not compiled");
+#endif
+}
+
+
+#endif
+
+#ifndef STBI_NO_ICO
+static int stbi__ico_info(stbi__context *s, int *x, int *y, int *comp)
+{
+   unsigned r, n;
+   r = stbi__get32le(s);
+   n = stbi__get16le(s);
+   if (n != 0x00010000 || n < 1 || n > 255 ) {
+       stbi__rewind( s );
+       return 0;
+   }
+   *x = stbi__get8(s);
+   *y = stbi__get8(s);
+   if (!*x) *x = 256;
+   if (!*y) *y = 256;
+   r = stbi__get8(s);
+   n = stbi__get16le(s);
+   if (r != 0 || n > 1 ) {
+       stbi__rewind( s );
+       return 0;
+   }
+   *comp = stbi__get8(s) / 8;
+   return 1;
 }
 #endif
 
@@ -7123,6 +7255,10 @@ static int stbi__info_main(stbi__context *s, int *x, int *y, int *comp)
 
    #ifndef STBI_NO_BMP
    if (stbi__bmp_info(s, x, y, comp))  return 1;
+   #endif
+
+   #ifndef STBI_NO_ICO
+   if (stbi__ico_info(s, x, y, comp))  return 1;
    #endif
 
    #ifndef STBI_NO_PSD
