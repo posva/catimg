@@ -257,6 +257,9 @@ void img_convert_colors(image_t *img)
 void img_free(image_t *img)
 {
         free(img->pixels);
+        if (img->delays) {
+                free(img->delays);
+        }
 }
 
 void img_resize(image_t *img, float wsc, float hsc)
