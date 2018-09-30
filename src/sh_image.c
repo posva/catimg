@@ -19,24 +19,37 @@ STBIDEF unsigned char *stbi__xload_main(stbi__context *s, int *x, int *y, int *f
                 gif_result head;
                 gif_result *prev = 0, *gr = &head;
 
+                int stride = 0;
+                unsigned char* temp = 0;
                 memset(&g, 0, sizeof(g));
                 memset(&head, 0, sizeof(head));
 
                 *frames = 0;
 
-                while ((gr->data = stbi__gif_load_next(s, &g, channels, 4))) {
+                while ((gr->data = stbi__gif_load_next(s, &g, channels, 4, 0))) {
                         if (gr->data == (unsigned char*)s) {
                                 gr->data = 0;
                                 break;
                         }
 
                         if (prev) prev->next = gr;
-                        gr->delay = g.delay;
+                        gr->delay = g.delay / 10; // the delay has been saved as 1/1000 s in the new stb_image.h
                         prev = gr;
                         gr = (gif_result*) stbi__malloc(sizeof(gif_result));
                         memset(gr, 0, sizeof(gif_result));
                         ++(*frames);
+
+                        {
+                          stride = 4 * g.w * g.h;
+                          temp = prev->data;
+                          prev->data = (unsigned char*)stbi__malloc(stride);
+                          memcpy(prev->data, temp, stride);
+                        }
                 }
+
+                STBI_FREE(g.out);
+                STBI_FREE(g.history);
+                STBI_FREE(g.background);
 
                 if (gr != &head)
                         STBI_FREE(gr);
@@ -69,7 +82,8 @@ STBIDEF unsigned char *stbi__xload_main(stbi__context *s, int *x, int *y, int *f
                         }
                 }
         } else {
-                result = stbi__load_main(s, x, y, channels, 0);
+                stbi__result_info ri;
+                result = stbi__load_main(s, x, y, channels, 0, &ri, 8);
                 *frames = !!result;
         }
 
@@ -142,7 +156,7 @@ void img_load_from_data(image_t *img, stbi_uc* ptr, int w, int h, int frames, in
                         exit(1);
                 }
 
-                if (frames > 1 && !(img->delays = malloc(sizeof(uint16_t) * (frames - 1)))) {
+                if (frames > 1 && !(img->delays = malloc(sizeof(uint16_t) * (frames)))) { // avoid buffer overflow
                         perror("malloc error\n");
                         exit(1);
                 }
@@ -243,6 +257,9 @@ void img_convert_colors(image_t *img)
 void img_free(image_t *img)
 {
         free(img->pixels);
+        if (img->delays) {
+                free(img->delays);
+        }
 }
 
 void img_resize(image_t *img, float wsc, float hsc)
