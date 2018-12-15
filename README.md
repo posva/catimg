@@ -1,5 +1,4 @@
-Catimg
-======
+# Catimg
 
 Renders images in the terminal.
 
@@ -9,70 +8,71 @@ Renders images in the terminal.
 It supports JPEG, PNG and GIF formats. This program was originally a script that
 did the same by using ImageMagick `convert`.
 
-Installation
-------------
+## Installation
 
 Homebrew
+
 ```
 brew install catimg
 ```
+
 Arch Linux
+
 ```
 yaourt -S catimg
 ```
+
 Fedora 25 and later
+
 ```
 dnf -y install catimg
 ```
 
-Building
---------
+## Building
 
 ```
 cmake .
 make install
 ```
 
-Script Dependencies
--------------------
+## Script Dependencies
+
 In order to use the script you need:
 
-* ImageMagick 6.6.0-4 2012-08-17 Q16 (Not tested with earlier versions)
-* shell with 256 colors support ( __change the__ `#!/usr/bin/env bash` __by
-    yours__). In OS X you just have to update the bash version using
-    [Homebrew](http://brew.sh/) (or any other method).
+- ImageMagick 6.6.0-4 2012-08-17 Q16 (Not tested with earlier versions)
+- shell with 256 colors support ( **change the** `#!/usr/bin/env bash` **by
+  yours**). In OS X you just have to update the bash version using
+  [Homebrew](http://brew.sh/) (or any other method).
 
-Examples
---------
+## Examples
 
 ![pikachu gif](https://cloud.githubusercontent.com/assets/664177/10122393/6846151e-6518-11e5-9a21-9be0c0765267.gif)
 
 ## High Resolution vs Low Resolution
+
 By using unicode characters catimg will try to display pictures in higher resolution. You can force the resolution with the `-r` option.
 
 ![cats](https://cloud.githubusercontent.com/assets/664177/10267481/da74d106-6a96-11e5-937d-efd452e53170.png)
 ![catslow](https://cloud.githubusercontent.com/assets/664177/10267494/07464a48-6a97-11e5-813e-0645f56b4c4f.png)
 
-Differences between Script and C version
-----------------------------------------
+## Differences between Script and C version
 
 Script version is **way more** accurate concerning colors but **considerably**
 slower.
 
-Contributing
-------------
+## Contributing
 
-I'm open to any contributions that helps `catimg`!  If you find bugs, please
+I'm open to any contributions that helps `catimg`! If you find bugs, please
 create an issue or do a pull request :smile:.
 
-License
--------
+## License
 
 [MIT](http://opensource.org/licenses/MIT)
 
 Copyright (c) Eduardo San Martin Morote
 
 ## Support on Beerpay
+
 Hey dude! Help me out for a couple of :beers:!
 
-[![Beerpay](https://beerpay.io/posva/catimg/badge.svg?style=beer-square)](https://beerpay.io/posva/catimg)  [![Beerpay](https://beerpay.io/posva/catimg/make-wish.svg?style=flat-square)](https://beerpay.io/posva/catimg?focus=wish)
+[![Beerpay](https://beerpay.io/posva/catimg/badge.svg?style=beer-square)](https://beerpay.io/posva/catimg) [![Beerpay](https://beerpay.io/posva/catimg/make-wish.svg?style=flat-square)](https://beerpay.io/posva/catimg?focus=wish)
