@@ -12,25 +12,25 @@ did the same by using ImageMagick `convert`.
 
 Homebrew
 
-```
+```sh
 brew install catimg
 ```
 
 Arch Linux
 
-```
+```sh
 yaourt -S catimg
 ```
 
 Fedora 25 and later
 
-```
+```sh
 dnf -y install catimg
 ```
 
 ## Building
 
-```
+```sh
 cmake .
 make install
 ```
