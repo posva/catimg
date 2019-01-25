@@ -15,7 +15,7 @@
   "  -r: Resolution must be 1 or 2. By default catimg checks for unicode support to " \
   "use higher resolution\n" \
   "  -c: Convert colors to a restricted palette\n" \
-  "  -t: Enables true color (24-bit) support, otherwise fallback to 256 color\n"
+  "  -t: Disables true color (24-bit) support, falling back to 256 color\n"
 
 // Transparency threshold -- all pixels with alpha below 25%.
 #define TRANSP_ALPHA 64
@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
 
     uint32_t cols = 0, precision = 0;
     uint8_t convert = 0;
-    uint8_t true_color = 0;
+    uint8_t true_color = 1;
     while ((c = getopt (argc, argv, "w:l:r:hct")) != -1)
         switch (c) {
             case 'w':
@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
                 convert = 1;
                 break;
             case 't':
-                true_color = 1;
+                true_color = 0;
                 break;
             default:
                 printf(USAGE);
