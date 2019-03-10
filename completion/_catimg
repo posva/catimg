@@ -42,6 +42,7 @@ _arguments \
   '-l[specify the amount of loops that catimg should repeat a GIF]' \
   '-r[force the resolution of the image]: :->resolution' \
   '-c[convert colors to a restricted palette]' \
+  '-t[disable true color and use 256 color instead]' \
   '*: :_files' && ret=0
 
 [[ "$state" == 'resolution' ]] && _values 'resolution value' 1 2 && ret=0

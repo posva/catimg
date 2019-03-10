@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <signal.h>
 
-#define USAGE "Usage: catimg [-h] [-w width] [-l loops] [-r resolution] image-file\n\n" \
+#define USAGE "Usage: catimg [-hct] [-w width] [-l loops] [-r resolution] image-file\n\n" \
   "  -h: Displays this message\n"                                      \
   "  -w: Terminal width by default\n"                           \
   "  -l: Loops are only useful with GIF files. A value of 1 means that the GIF will " \
@@ -14,7 +14,8 @@
   "looping\n"                                                           \
   "  -r: Resolution must be 1 or 2. By default catimg checks for unicode support to " \
   "use higher resolution\n" \
-  "  -c: Convert colors to a restricted palette\n"
+  "  -c: Convert colors to a restricted palette\n" \
+  "  -t: Disables true color (24-bit) support, falling back to 256 color\n"
 
 // Transparency threshold -- all pixels with alpha below 25%.
 #define TRANSP_ALPHA 64
@@ -68,7 +69,8 @@ int main(int argc, char *argv[])
 
     uint32_t cols = 0, precision = 0;
     uint8_t convert = 0;
-    while ((c = getopt (argc, argv, "w:l:r:hc")) != -1)
+    uint8_t true_color = 1;
+    while ((c = getopt (argc, argv, "w:l:r:hct")) != -1)
         switch (c) {
             case 'w':
                 cols = strtol(optarg, &num, 0) >> 1;
@@ -84,8 +86,11 @@ int main(int argc, char *argv[])
                 exit(0);
                 break;
             case 'c':
-              convert = 1;
-              break;
+                convert = 1;
+                break;
+            case 't':
+                true_color = 0;
+                break;
             default:
                 printf(USAGE);
                 exit(1);
@@ -145,49 +150,54 @@ int main(int argc, char *argv[])
                 for (x = 0; x < img.width; x++) {
                     index = y * img.width + x + offset;
                     const color_t* upperPixel = &img.pixels[index];
+                    uint32_t fgCol = pixelToInt(upperPixel);
                     if (precision == 2) {
                         if (y < img.height - 1) {
                             const color_t* lowerPixel = &img.pixels[index + img.width];
-                            /* uint32_t bgCol = pixelToInt(&img.pixels[index + img.width]); */
+                            uint32_t bgCol = pixelToInt(&img.pixels[index + img.width]);
                             if (upperPixel->a < TRANSP_ALPHA) { // first pixel is transparent
                                 if (lowerPixel->a < TRANSP_ALPHA)
                                     printf("\e[m ");
                                 else
-                                    printf("\x1b[0;38;2;%d;%d;%dm\u2584",
-                                           lowerPixel->r, lowerPixel->g, lowerPixel->b
-                                           );
-                                    /* printf("\e[0;38;5;%um\u2584", bgCol); */
+                                    if (true_color)
+                                        printf("\x1b[0;38;2;%d;%d;%dm\u2584",
+                                               lowerPixel->r, lowerPixel->g, lowerPixel->b);
+                                    else
+                                        printf("\e[0;38;5;%um\u2584", bgCol);
                             } else {
                                 if (lowerPixel->a < TRANSP_ALPHA)
-                                    /* printf("\e[0;38;5;%um\u2580", fgCol); */
-                                    printf("\x1b[0;38;2;%d;%d;%dm\u2580",
-                                           upperPixel->r, upperPixel->g, upperPixel->b
-                                           );
+                                    if (true_color)
+                                        printf("\x1b[0;38;2;%d;%d;%dm\u2580",
+                                               upperPixel->r, upperPixel->g, upperPixel->b);
+                                    else
+                                        printf("\e[0;38;5;%um\u2580", fgCol);
                                 else
-                                    /* printf("\e[38;5;%u;48;5;%um\u2580", fgCol, bgCol); */
-                                    printf("\x1b[48;2;%d;%d;%dm\x1b[38;2;%d;%d;%dm\u2584",
-                                           upperPixel->r, upperPixel->g, upperPixel->b,
-                                           lowerPixel->r, lowerPixel->g, lowerPixel->b
-                                           );
-
+                                    if (true_color)
+                                        printf("\x1b[48;2;%d;%d;%dm\x1b[38;2;%d;%d;%dm\u2584",
+                                               upperPixel->r, upperPixel->g, upperPixel->b,
+                                               lowerPixel->r, lowerPixel->g, lowerPixel->b);
+                                    else
+                                         printf("\e[38;5;%u;48;5;%um\u2580", fgCol, bgCol);
                             }
                         } else { // this is the last line
                             if (upperPixel->a < TRANSP_ALPHA)
                                 printf("\e[m ");
                             else
-                                printf("\x1b[0;38;2;%d;%d;%dm\u2580",
-                                       upperPixel->r, upperPixel->g, upperPixel->b
-                                       );
-                                /* printf("\e[38;5;%um\u2580", fgCol); */
+                                if (true_color)
+                                    printf("\x1b[0;38;2;%d;%d;%dm\u2580",
+                                           upperPixel->r, upperPixel->g, upperPixel->b);
+                                else
+                                    printf("\e[38;5;%um\u2580", fgCol);
                         }
                     } else {
                         if (img.pixels[index].a < TRANSP_ALPHA)
                             printf("\e[m  ");
                         else
-                          printf("\x1b[0;48;2;%d;%d;%dm  ",
-                                 img.pixels[index].r, img.pixels[index].g, img.pixels[index].b
-                                 );
-                            /* printf("\e[48;5;%um  ", fgCol); */
+                            if (true_color)
+                                printf("\x1b[0;48;2;%d;%d;%dm  ",
+                                       img.pixels[index].r, img.pixels[index].g, img.pixels[index].b);
+                            else
+                                printf("\e[48;5;%um  ", fgCol);
                     }
                 }
                 printf("\e[m\n");
@@ -203,4 +213,3 @@ int main(int argc, char *argv[])
     free_hash_colors();
     return 0;
 }
-
