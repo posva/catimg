@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "sh_image.h"
 #include "sh_utils.h"
 #include <unistd.h>
@@ -19,7 +20,6 @@
 
 // Transparency threshold -- all pixels with alpha below 25%.
 #define TRANSP_ALPHA 64
-
 extern char *optarg;
 extern int optind;
 extern int optopt;
@@ -34,6 +34,14 @@ void intHandler() {
     loops = loop;
     stop = 1;
 }
+
+/**
+ * struct which is passed into nanosleep.
+ * See Issue # 35 */
+struct timespec {
+    time_t tv_sec;  /* seconds */       
+    long   tv_nsec; /* nanoseconds */   
+};
 
 int getopt(int argc, char * const argv[], const char *optstring);
 
@@ -65,8 +73,10 @@ int main(int argc, char *argv[])
     char *file;
     char *num;
     int c;
+    struct timespec req;  
+    
+    req.tv_sec = 0;
     opterr = 0;
-
     uint32_t cols = 0, precision = 0;
     uint8_t convert = 0;
     uint8_t true_color = 1;
@@ -139,10 +149,13 @@ int main(int argc, char *argv[])
         uint32_t offset = 0;
         for (uint32_t frame = 0; frame < img.frames; frame++) {
             if (frame > 0 || loop > 0) {
-                if (frame > 0)
-                    usleep(img.delays[frame - 1] * 10000);
-                else
-                    usleep(img.delays[img.frames - 1] * 10000);
+                if (frame > 0) {
+                    req.tv_nsec = (long)(img.delays[frame - 1] * 10000000L);
+                    nanosleep(&req, (struct timespec *)NULL);
+                } else {
+                  /*  req.tv_nsec = (long)(img.delays[img.frames - 1] * 100000000000L);
+                    nanosleep(&req, (struct timespec *)NULL); */
+                }
                 printf("\e[u");
             }
             uint32_t index, x, y;
