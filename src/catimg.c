@@ -153,8 +153,8 @@ int main(int argc, char *argv[])
                     req.tv_nsec = (long)(img.delays[frame - 1] * 10000000L);
                     nanosleep(&req, (struct timespec *)NULL);
                 } else {
-                  /*  req.tv_nsec = (long)(img.delays[img.frames - 1] * 100000000000L);
-                    nanosleep(&req, (struct timespec *)NULL); */
+                    req.tv_nsec = (long)(img.delays[img.frames - 1] * 10000000L);
+                   nanosleep(&req, (struct timespec *)NULL);
                 }
                 printf("\e[u");
             }
