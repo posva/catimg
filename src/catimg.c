@@ -150,11 +150,11 @@ int main(int argc, char *argv[])
         for (uint32_t frame = 0; frame < img.frames; frame++) {
             if (frame > 0 || loop > 0) {
                 if (frame > 0) {
-                    req.tv_nsec = (long)(img.delays[frame - 1] * 10000000L);
+                    req.tv_nsec = (long)(img.delays[frame - 1] * 1000000L);
                     nanosleep(&req, (struct timespec *)NULL);
                 } else {
-                    req.tv_nsec = (long)(img.delays[img.frames - 1] * 10000000L);
-                   nanosleep(&req, (struct timespec *)NULL);
+                   /* req.tv_nsec = (long)(img.delays[img.frames - 1] * 10000000L);
+                   nanosleep(&req, (struct timespec *)NULL); */
                 }
                 printf("\e[u");
             }
