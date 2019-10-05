@@ -3,7 +3,7 @@
 #include <string.h>
 #include "sh_image.h"
 #include "sh_utils.h"
-#include <unistd.h>
+#include <time.h>
 #include <signal.h>
 
 #define USAGE "Usage: catimg [-hct] [-w width] [-l loops] [-r resolution] image-file\n\n" \
@@ -56,6 +56,14 @@ char supportsUTF8() {
     return (LC_ALL && strstr(LC_ALL, UTF))
         || (LANG && strstr(LANG, UTF))
         || (LC_CTYPE && strstr(LC_CTYPE, UTF));
+}
+
+// sleep for at least delay / 100 seconds
+void mysleep(const uint16_t delay) {
+    struct timespec time;
+    time.tv_sec = delay / 100;
+    time.tv_nsec = (delay - 100 * (time.tv_sec)) * 10000;
+    while (nanosleep(&time, &time));
 }
 
 int main(int argc, char *argv[])
@@ -140,9 +148,9 @@ int main(int argc, char *argv[])
         for (uint32_t frame = 0; frame < img.frames; frame++) {
             if (frame > 0 || loop > 0) {
                 if (frame > 0)
-                    usleep(img.delays[frame - 1] * 10000);
+                    mysleep(img.delays[frame - 1]);
                 else
-                    usleep(img.delays[img.frames - 1] * 10000);
+                    mysleep(img.delays[img.frames - 1]);
                 printf("\e[u");
             }
             uint32_t index, x, y;
