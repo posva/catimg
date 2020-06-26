@@ -33,6 +33,13 @@
 uint32_t terminal_columns();
 
 /**
+ * @brief Get the number of rows for the terminal
+ * @return the number of rows
+ */
+uint32_t terminal_rows();
+
+
+/**
  * @brief Read binary data from stdin
  * @param ptr Address to the ptr which will be filled with the data
  * @return number of bytes read

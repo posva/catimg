@@ -5,10 +5,12 @@
 #include "sh_utils.h"
 #include <unistd.h>
 #include <signal.h>
+#include <sys/ioctl.h>
 
-#define USAGE "Usage: catimg [-hct] [-w width] [-l loops] [-r resolution] image-file\n\n" \
+#define USAGE "Usage: catimg [-hct] [-w width | -H height] [-l loops] [-r resolution] image-file\n\n" \
   "  -h: Displays this message\n"                                      \
-  "  -w: Terminal width by default\n"                           \
+  "  -w: Terminal width/columns by default\n"                           \
+  "  -H: Terminal height/row by default\n"                           \
   "  -l: Loops are only useful with GIF files. A value of 1 means that the GIF will " \
   "be displayed twice because it loops once. A negative value means infinite " \
   "looping\n"                                                           \
@@ -16,6 +18,8 @@
   "use higher resolution\n" \
   "  -c: Convert colors to a restricted palette\n" \
   "  -t: Disables true color (24-bit) support, falling back to 256 color\n"
+
+#define ERR_WIDTH_OR_HEIGHT "[ERROR] '-w' and '-H' can't be used at the same time\n\n"
 
 // Transparency threshold -- all pixels with alpha below 25%.
 #define TRANSP_ALPHA 64
@@ -67,14 +71,39 @@ int main(int argc, char *argv[])
     int c;
     opterr = 0;
 
-    uint32_t cols = 0, precision = 0;
+    uint32_t cols = 0, rows = 0, precision = 0;
+    uint32_t maxCols = 0, maxRows = 0;
     uint8_t convert = 0;
     uint8_t true_color = 1;
-    while ((c = getopt (argc, argv, "w:l:r:hct")) != -1)
+    uint8_t adjust_to_height = 0, adjust_to_width = 0;
+    float sc = 0, sr = 0;
+
+    while ((c = getopt (argc, argv, "H:w:l:r:hct")) != -1)
         switch (c) {
+            case 'H':
+                rows = strtol(optarg, &num, 0) >> 1;
+                if (adjust_to_width) {
+                    // only either adjust to width or adjust to height is allowed, but not both.
+                    printf(ERR_WIDTH_OR_HEIGHT);
+                    printf(USAGE);
+                    exit(1);
+                }
+                if (rows == 0) {
+                    adjust_to_height = 1;
+                }
+                break;
             case 'w':
                 cols = strtol(optarg, &num, 0) >> 1;
-                break;
+                if (adjust_to_height) {
+                    // only either adjust to width or adjust to height is allowed, but not both.
+                    printf(ERR_WIDTH_OR_HEIGHT);
+                    printf(USAGE);
+                    exit(1);
+                }
+                 if (cols == 0) {
+                    adjust_to_width = 1;
+                }
+                 break;
             case 'l':
                 loops = strtol(optarg, &num, 0);
                 break;
@@ -111,18 +140,31 @@ int main(int argc, char *argv[])
             precision = 1;
     }
 
-    if (cols < 1) // if precision is 2 we can use the terminal full width. Otherwise we can only use half
-        cols = terminal_columns() / (2 / precision);
+    // if precision is 2 we can use the terminal full width/height. Otherwise we can only use half
+    maxCols = terminal_columns() / (2 / precision);
+    maxRows = terminal_rows() * 2 / (2 / precision);
 
     if (strcmp(file, "-") == 0) {
         img_load_from_stdin(&img);
     } else {
         img_load_from_file(&img, file);
     }
-    if (cols < img.width) {
-        float sc = cols/(float)img.width;
+    if (cols == 0 && rows == 0) {
+        sc = maxCols/(float)img.width;
+        sr = maxRows /(float)img.height;
+        if (adjust_to_height && sr < sc && maxRows < img.height)
+            // rows == 0 and adjust_to_height > adjust to height instead of width
+            img_resize(&img, sr, sr);
+        else if (maxCols < img.width)
+            img_resize(&img, sc, sc);
+    } else if (cols > 0 && cols < img.width) {
+        sc = cols/(float)img.width;
         img_resize(&img, sc, sc);
+     } else if (rows > 0 && rows < img.height) {
+        sr = (float)(rows * 2)/(float)img.height;
+        img_resize(&img, sr, sr);
     }
+
     if (convert)
         img_convert_colors(&img);
     /*printf("Loaded %s: %ux%u. Console width: %u\n", file, img.width, img.height, cols);*/
