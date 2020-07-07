@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
     opterr = 0;
 
     uint32_t cols = 0, rows = 0, precision = 0;
-    uint32_t maxCols = 0, maxRows = 0;
+    uint32_t max_cols = 0, max_rows = 0;
     uint8_t convert = 0;
     uint8_t true_color = 1;
     uint8_t adjust_to_height = 0, adjust_to_width = 0;
@@ -141,8 +141,8 @@ int main(int argc, char *argv[])
     }
 
     // if precision is 2 we can use the terminal full width/height. Otherwise we can only use half
-    maxCols = terminal_columns() / (2 / precision);
-    maxRows = terminal_rows() * 2 / (2 / precision);
+    max_cols = terminal_columns() / (2 / precision);
+    max_rows = terminal_rows() * 2 / (2 / precision);
 
     if (strcmp(file, "-") == 0) {
         img_load_from_stdin(&img);
@@ -150,12 +150,12 @@ int main(int argc, char *argv[])
         img_load_from_file(&img, file);
     }
     if (cols == 0 && rows == 0) {
-        sc = maxCols/(float)img.width;
-        sr = maxRows /(float)img.height;
-        if (adjust_to_height && sr < sc && maxRows < img.height)
+        sc = max_cols/(float)img.width;
+        sr = max_rows /(float)img.height;
+        if (adjust_to_height && sr < sc && max_rows < img.height)
             // rows == 0 and adjust_to_height > adjust to height instead of width
             img_resize(&img, sr, sr);
-        else if (maxCols < img.width)
+        else if (max_cols < img.width)
             img_resize(&img, sc, sc);
     } else if (cols > 0 && cols < img.width) {
         sc = cols/(float)img.width;

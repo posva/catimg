@@ -14,7 +14,7 @@ is a little program written in C with no dependencies that prints images in the 
 .SH OPTIONS
 .TP
 \fB\-c\fR
-Convert colors to a restricted palette. This is useful when terminal only support a limited set of colors. This transformation should be more accurate than the one performed by the terminal.
+Coerce colors to a restricted palette. Allows terminals with limited color support to render a more accurate version of the image than if it was directly done by the terminal itself.
 .TP
 \fB\-h\fR
 Prints a help message
@@ -32,7 +32,7 @@ Possible values 1 or 2. Force the resolution of the image. By default catimg wil
 Disables true color (24-bit) support, falling back to 256 color escape codes instead.
 .TP
 \fB\-w\fR WIDTH
-Specify the width of the displayed image, by default catimg will use the terminal width.
+Specify the width of the displayed image. When not provided, catimg will use the terminal width.
 
 .SH BUGS
 Please report any bugs to https://github.com/posva/catimg/issues.
@@ -40,4 +40,4 @@ Please report any bugs to https://github.com/posva/catimg/issues.
 .SH AUTHORS
 catimg was written by Eduardo San Martin Morote (https://github.com/posva)
 .LP
-This manual page was written by Jonathan Carter <jcarter@linux.com> and Eduardo San Martin Morote and extended by Thomas Kupper
+This manual page was written by Jonathan Carter <jcarter@linux.com>, Eduardo San Martin Morote and Thomas Kupper
