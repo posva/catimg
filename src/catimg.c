@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
     uint8_t convert = 0;
     uint8_t true_color = 1;
     uint8_t adjust_to_height = 0, adjust_to_width = 0;
-    float sc = 0, sr = 0;
+    float scale_cols = 0, scale_rows = 0;
 
     while ((c = getopt (argc, argv, "H:w:l:r:hct")) != -1)
         switch (c) {
@@ -150,19 +150,19 @@ int main(int argc, char *argv[])
         img_load_from_file(&img, file);
     }
     if (cols == 0 && rows == 0) {
-        sc = max_cols/(float)img.width;
-        sr = max_rows /(float)img.height;
-        if (adjust_to_height && sr < sc && max_rows < img.height)
+        scale_cols = max_cols / (float)img.width;
+        scale_rows = max_rows / (float)img.height;
+        if (adjust_to_height && scale_rows < scale_cols && max_rows < img.height)
             // rows == 0 and adjust_to_height > adjust to height instead of width
-            img_resize(&img, sr, sr);
+            img_resize(&img, scale_rows, scale_rows);
         else if (max_cols < img.width)
-            img_resize(&img, sc, sc);
+            img_resize(&img, scale_cols, scale_cols);
     } else if (cols > 0 && cols < img.width) {
-        sc = cols/(float)img.width;
-        img_resize(&img, sc, sc);
+        scale_cols = cols / (float)img.width;
+        img_resize(&img, scale_cols, scale_cols);
      } else if (rows > 0 && rows < img.height) {
-        sr = (float)(rows * 2)/(float)img.height;
-        img_resize(&img, sr, sr);
+        scale_rows = (float)(rows * 2) / (float)img.height;
+        img_resize(&img, scale_rows, scale_rows);
     }
 
     if (convert)
