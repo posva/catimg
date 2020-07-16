@@ -88,9 +88,7 @@ int main(int argc, char *argv[])
                     printf(USAGE);
                     exit(1);
                 }
-                if (rows == 0) {
-                    adjust_to_height = 1;
-                }
+                adjust_to_height = 1;
                 break;
             case 'w':
                 cols = strtol(optarg, &num, 0) >> 1;
@@ -100,10 +98,8 @@ int main(int argc, char *argv[])
                     printf(USAGE);
                     exit(1);
                 }
-                 if (cols == 0) {
-                    adjust_to_width = 1;
-                }
-                 break;
+                adjust_to_width = 1;
+                break;
             case 'l':
                 loops = strtol(optarg, &num, 0);
                 break;
