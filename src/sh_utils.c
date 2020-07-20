@@ -29,6 +29,21 @@ uint32_t terminal_columns()
 #endif
 }
 
+uint32_t terminal_rows()
+{
+#ifdef WINDOWS
+        CONSOLE_SCREEN_BUFFER_INFO csbi;
+        int ret;
+        ret = GetConsoleScreenBufferInfo(GetStdHandle( STD_OUTPUT_HANDLE ),&csbi);
+        return ret?csbi.dwSize.Y:0;
+#else
+        struct winsize win;
+        ioctl(1, TIOCGWINSZ, &win);
+        return win.ws_row;
+#endif
+}
+
+
 #define READ_BUF_SIZE 4096
 uint32_t read_stdin(unsigned char **ptr) {
 #ifdef WINDOWS

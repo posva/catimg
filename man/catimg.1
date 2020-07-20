@@ -1,12 +1,11 @@
-.TH CATIMG "1" "January 2017" "catimg" "General Commands Manual"
+.TH CATIMG "1" "June 2020" "catimg" "General Commands Manual"
 
 .SH NAME
 catimg \- fast image printing in to your terminal
 
 .SH SYNOPSIS
 .B catimg
-[\fIoptions\fP]
-\fBimage\fP
+[\fB-hct\fP] [\fB-w width\fP | \fB-H height\fP] [\fB-l loops\fP] [\fB-r resolution\fP] image
 
 .SH DESCRIPTION
 .B catimg
@@ -14,11 +13,14 @@ is a little program written in C with no dependencies that prints images in the 
 
 .SH OPTIONS
 .TP
+\fB\-c\fR
+Coerce colors to a restricted palette. Allows terminals with limited color support to render a more accurate version of the image than if it was directly done by the terminal itself.
+.TP
 \fB\-h\fR
 Prints a help message
 .TP
-\fB\-w\fR WIDTH
-Specify the width of the displayed image, by default catimg will use the terminal width.
+\fB\-H\fR HEIGHT
+Specify the height of the displayed image, passing '0' will use terminal height.
 .TP
 \fB\-l\fR LOOPS
 Specify the amount of loops that catimg should repeat a GIF. A value of 1 means that the GIF will be displayed twice. A negative value implies infinity.
@@ -26,11 +28,11 @@ Specify the amount of loops that catimg should repeat a GIF. A value of 1 means 
 \fB\-r\fR RESOLUTION
 Possible values 1 or 2. Force the resolution of the image. By default catimg will check if rendering in higher resolution is possible and do so or use the lower one.
 .TP
-\fB\-c\fR
-Convert colors to a restricted palette. This is useful when terminal only support a limited set of colors. This transformation should be more accurate than the one performed by the terminal.
-.TP
 \fB\-t\fR
 Disables true color (24-bit) support, falling back to 256 color escape codes instead.
+.TP
+\fB\-w\fR WIDTH
+Specify the width of the displayed image. When not provided, catimg will use the terminal width.
 
 .SH BUGS
 Please report any bugs to https://github.com/posva/catimg/issues.
@@ -38,4 +40,4 @@ Please report any bugs to https://github.com/posva/catimg/issues.
 .SH AUTHORS
 catimg was written by Eduardo San Martin Morote (https://github.com/posva)
 .LP
-This manual page was written by Jonathan Carter <jcarter@linux.com> and Eduardo San Martin Morote
+This manual page was written by Jonathan Carter <jcarter@linux.com>, Eduardo San Martin Morote and Thomas Kupper
