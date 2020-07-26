@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
         scale_cols = cols / (float)img.width;
         img_resize(&img, scale_cols, scale_cols);
      } else if (rows > 0 && rows < img.height) {
-        scale_rows = (float)(rows * 2) / (float)img.height;
+        scale_rows = rows / (float)img.height;
         img_resize(&img, scale_rows, scale_rows);
     }
 
