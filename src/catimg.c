@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
     while ((c = getopt (argc, argv, "H:w:l:r:hct")) != -1)
         switch (c) {
             case 'H':
-                rows = strtol(optarg, &num, 0) >> 1;
+                rows = strtol(optarg, &num, 0);
                 if (adjust_to_width) {
                     // only either adjust to width or adjust to height is allowed, but not both.
                     printf(ERR_WIDTH_OR_HEIGHT);
@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
 
     // if precision is 2 we can use the terminal full width/height. Otherwise we can only use half
     max_cols = terminal_columns() / (2 / precision);
-    max_rows = terminal_rows() * 2 / (2 / precision);
+    max_rows = terminal_rows() * precision;
 
     if (strcmp(file, "-") == 0) {
         img_load_from_stdin(&img);
@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
         scale_cols = cols / (float)img.width;
         img_resize(&img, scale_cols, scale_cols);
      } else if (rows > 0 && rows < img.height) {
-        scale_rows = (float)(rows * 2) / (float)img.height;
+        scale_rows = rows / (float)img.height;
         img_resize(&img, scale_rows, scale_rows);
     }
 
