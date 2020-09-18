@@ -7,9 +7,10 @@
 #include <signal.h>
 #include <sys/ioctl.h>
 
+#define USAGE "Usage: catimg [-hct] [-w width] [-l loops] [-r resolution] image-file [image-file ...]\n\n" \
   "  -h: Displays this message\n"                                      \
-  "  -w: Terminal width/columns by default\n"                           \
-  "  -H: Terminal height/row by default\n"                           \
+  "  -w: Terminal width by default\n"                           \
+  "  -H: Terminal height/row by default\n"                          \
   "  -l: Loops are only useful with GIF files. A value of 1 means that the GIF will " \
   "be displayed twice because it loops once. A negative value means infinite " \
   "looping\n"                                                           \
@@ -41,7 +42,7 @@ void intHandler() {
     stop = 1;
 }
 
-// in case use interrupts
+// in case user interrupts
 void sig_handler(int signo) {
     if(signo == SIGINT) {
         // Display the cursor again
@@ -92,7 +93,7 @@ int main(int argc, char *argv[])
     uint8_t adjust_to_height = 0, adjust_to_width = 0;
     float scale_cols = 0, scale_rows = 0;
 
-    while ((c = getopt (argc, argv, "H:w:l:r:hct")) != -1)
+    while ((c = getopt (argc, argv, "H:w:l:r:hct")) != -1) {
         switch (c) {
             case 'H':
                 rows = strtol(optarg, &num, 0);
@@ -135,6 +136,8 @@ int main(int argc, char *argv[])
                 exit(1);
                 break;
         }
+    }
+
     // only files should come up after the options
     // https://www.tutorialspoint.com/getopt-function-in-c-to-parse-command-line-arguments
     for (; optind < argc; optind++) {
@@ -183,10 +186,23 @@ int main(int argc, char *argv[])
         } else {
             img_load_from_file(&img, files[j]);
         }
-        if (cols < img.width) {
-            float sc = cols/(float)img.width;
-            img_resize(&img, sc, sc);
+
+        if (cols == 0 && rows == 0) {
+            scale_cols = max_cols / (float)img.width;
+            scale_rows = max_rows / (float)img.height;
+            if (adjust_to_height && scale_rows < scale_cols && max_rows < img.height)
+                // rows == 0 and adjust_to_height > adjust to height instead of width
+                img_resize(&img, scale_rows, scale_rows);
+            else if (max_cols < img.width)
+                img_resize(&img, scale_cols, scale_cols);
+        } else if (cols > 0 && cols < img.width) {
+            scale_cols = cols / (float)img.width;
+            img_resize(&img, scale_cols, scale_cols);
+         } else if (rows > 0 && rows < img.height) {
+            scale_rows = rows / (float)img.height;
+            img_resize(&img, scale_rows, scale_rows);
         }
+
         if (convert)
             img_convert_colors(&img);
         /*printf("Loaded %s: %ux%u. Console width: %u\n", file, img.width, img.height, cols);*/
@@ -271,13 +287,11 @@ int main(int argc, char *argv[])
         }
 
         img_free(&img);
-
     } // for (j=0; j < i; j++)
 
     // Display the cursor again
     printf("\e[?25h");
 
     free_hash_colors();
-
     return 0;
 }
