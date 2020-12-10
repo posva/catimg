@@ -90,7 +90,7 @@ STBIDEF unsigned char *stbi__xload_main(stbi__context *s, int *x, int *y, int *f
         return result;
 }
 
-// stbi_xload was written by urraka and slighty modified by me (posva) to make
+// stbi_xload was written by urraka and slightly modified by me (posva) to make
 // it have a channels argument. Thanks to urraka for his help with this :)
 STBIDEF unsigned char *stbi_xload(char const *filename, int *x, int *y, int *frames, int *channels)
 {
