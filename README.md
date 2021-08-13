@@ -70,9 +70,3 @@ create an issue or do a pull request :smile:.
 [MIT](http://opensource.org/licenses/MIT)
 
 Copyright (c) Eduardo San Martin Morote
-
-## Support on Beerpay
-
-Hey dude! Help me out for a couple of :beers:!
-
-[![Beerpay](https://beerpay.io/posva/catimg/badge.svg?style=beer-square)](https://beerpay.io/posva/catimg) [![Beerpay](https://beerpay.io/posva/catimg/make-wish.svg?style=flat-square)](https://beerpay.io/posva/catimg?focus=wish)
