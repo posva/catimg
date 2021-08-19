@@ -6320,6 +6320,9 @@ static int stbi__gif_header(stbi__context *s, stbi__gif *g, int *comp, int is_in
    g->ratio = stbi__get8(s);
    g->transparent = -1;
 
+   // Based on 32K resolution
+   if (g->w > 30720 || g->h > 17280)        return stbi__err("pixel size of GIF is too big", "Too big GIF");
+
    if (comp != 0) *comp = 4;  // can't actually tell whether it's 3 or 4 until we parse the comments
 
    if (is_info) return 1;
