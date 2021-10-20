@@ -16,6 +16,8 @@
   "looping\n"                                                           \
   "  -r: Resolution must be 1 or 2. By default catimg checks for unicode support to " \
   "use higher resolution\n" \
+  "  -a: Font aspect ratio multiplier. For a condensed font, use values greater than " \
+  "1.0, for wider fonts, less than 1.0\n" \
   "  -c: Convert colors to a restricted palette\n" \
   "  -t: Disables true color (24-bit) support, falling back to 256 color\n"
 
@@ -76,9 +78,10 @@ int main(int argc, char *argv[])
     uint8_t convert = 0;
     uint8_t true_color = 1;
     uint8_t adjust_to_height = 0, adjust_to_width = 0;
-    float scale_cols = 0, scale_rows = 0;
+    float scale_cols = 1.0, scale_rows = 1.0;
+    float aspect = 1.0;
 
-    while ((c = getopt (argc, argv, "H:w:l:r:hct")) != -1)
+    while ((c = getopt (argc, argv, "H:w:l:r:a:hct")) != -1)
         switch (c) {
             case 'H':
                 rows = strtol(optarg, &num, 0);
@@ -105,6 +108,9 @@ int main(int argc, char *argv[])
                 break;
             case 'r':
                 precision = strtol(optarg, &num, 0);
+                break;
+            case 'a':
+                aspect = strtof(optarg, &num);
                 break;
             case 'h':
                 printf(USAGE);
@@ -150,16 +156,23 @@ int main(int argc, char *argv[])
         scale_rows = max_rows / (float)img.height;
         if (adjust_to_height && scale_rows < scale_cols && max_rows < img.height)
             // rows == 0 and adjust_to_height > adjust to height instead of width
-            img_resize(&img, scale_rows, scale_rows);
+            scale_cols = scale_rows;
         else if (max_cols < img.width)
-            img_resize(&img, scale_cols, scale_cols);
+            scale_rows = scale_cols;
+        else scale_rows = scale_cols = 1.0;
     } else if (cols > 0 && cols < img.width) {
-        scale_cols = cols / (float)img.width;
-        img_resize(&img, scale_cols, scale_cols);
-     } else if (rows > 0 && rows < img.height) {
-        scale_rows = rows / (float)img.height;
-        img_resize(&img, scale_rows, scale_rows);
+        scale_cols = scale_rows = cols / (float)img.width;
+    } else if (rows > 0 && rows < img.height) {
+        scale_cols = scale_rows = rows / (float)img.height;
     }
+
+    if (aspect > 1.0) {
+        scale_rows /= aspect;
+    } else {
+        scale_cols *= aspect;
+    }
+
+    img_resize(&img, scale_cols, scale_rows);
 
     if (convert)
         img_convert_colors(&img);
