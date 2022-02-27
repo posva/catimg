@@ -5,7 +5,7 @@ catimg \- fast image printing in to your terminal
 
 .SH SYNOPSIS
 .B catimg
-[\fB-hct\fP] [\fB-w width\fP | \fB-H height\fP] [\fB-l loops\fP] [\fB-r resolution\fP] image
+[\fB-hct\fP] [\fB-w width\fP | \fB-H height\fP] [\fB-o height offset\fP] [\fB-l loops\fP] [\fB-r resolution\fP] image
 
 .SH DESCRIPTION
 .B catimg
@@ -21,6 +21,9 @@ Prints a help message
 .TP
 \fB\-H\fR HEIGHT
 Specify the height of the displayed image, passing '0' will use terminal height.
+.TP
+\fB\-o\fR HEIGHT_OFFSET
+Specify the height offset of the displayed image, passing '0' will use no terminal height offset.
 .TP
 \fB\-l\fR LOOPS
 Specify the amount of loops that catimg should repeat a GIF. A value of 1 means that the GIF will be displayed twice. A negative value implies infinity.
