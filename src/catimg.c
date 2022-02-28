@@ -11,7 +11,7 @@
   "  -h: Displays this message\n"                                      \
   "  -w: Terminal width/columns by default\n"                           \
   "  -H: Terminal height/row by default\n"                           \
-  "  -o: Terminal height offset by default\n"                           \
+  "  -o: Terminal height offset by default 1\n"                           \
   "  -l: Loops are only useful with GIF files. A value of 1 means that the GIF will " \
   "be displayed twice because it loops once. A negative value means infinite " \
   "looping\n"                                                           \
@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
     opterr = 0;
 
     uint32_t cols = 0, rows = 0, precision = 0;
-    uint32_t height_offset = 0; // To account for the prompt in vertical scaling
+    uint32_t height_offset = 1; // To account for the prompt in vertical scaling
     uint32_t max_cols = 0, max_rows = 0;
     uint8_t convert = 0;
     uint8_t true_color = 1;
