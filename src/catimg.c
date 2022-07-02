@@ -11,6 +11,7 @@
   "  -h: Displays this message\n"                                      \
   "  -w: Terminal width/columns by default\n"                           \
   "  -H: Terminal height/row by default\n"                           \
+  "  -o: Terminal height offset by default 1\n"                           \
   "  -l: Loops are only useful with GIF files. A value of 1 means that the GIF will " \
   "be displayed twice because it loops once. A negative value means infinite " \
   "looping\n"                                                           \
@@ -72,13 +73,14 @@ int main(int argc, char *argv[])
     opterr = 0;
 
     uint32_t cols = 0, rows = 0, precision = 0;
+    uint32_t height_offset = 1; // To account for the prompt in vertical scaling
     uint32_t max_cols = 0, max_rows = 0;
     uint8_t convert = 0;
     uint8_t true_color = 1;
     uint8_t adjust_to_height = 0, adjust_to_width = 0;
     float scale_cols = 0, scale_rows = 0;
 
-    while ((c = getopt (argc, argv, "H:w:l:r:hct")) != -1)
+    while ((c = getopt (argc, argv, "H:o:w:l:r:hct")) != -1)
         switch (c) {
             case 'H':
                 rows = strtol(optarg, &num, 0);
@@ -89,6 +91,9 @@ int main(int argc, char *argv[])
                     exit(1);
                 }
                 adjust_to_height = 1;
+                break;
+            case 'o':
+                height_offset = strtol(optarg, &num, 0);
                 break;
             case 'w':
                 cols = strtol(optarg, &num, 0) >> 1;
@@ -138,7 +143,7 @@ int main(int argc, char *argv[])
 
     // if precision is 2 we can use the terminal full width/height. Otherwise we can only use half
     max_cols = terminal_columns() / (2 / precision);
-    max_rows = terminal_rows() * precision;
+    max_rows = (terminal_rows() - height_offset) * precision;
 
     if (strcmp(file, "-") == 0) {
         img_load_from_stdin(&img);

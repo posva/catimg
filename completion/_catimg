@@ -40,6 +40,7 @@ _arguments \
   '-c[convert colors to a restricted palette]' \
   '-h[display a help message]' \
   '-H[specify the height of the displayed image]' \
+  '-o[specify the height offset of the displayed image]' \
   '-l[specify the amount of loops that catimg should repeat a GIF]' \
   '-r[force the resolution of the image]: :->resolution' \
   '-t[disable true color and use 256 color instead]' \
