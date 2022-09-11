@@ -19,7 +19,7 @@ brew install catimg
 Arch Linux
 
 ```sh
-yaourt -S catimg
+sudo pacman -S catimg
 ```
 
 Fedora 25 and later
