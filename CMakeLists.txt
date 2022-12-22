@@ -10,7 +10,7 @@ endif()
 # set some options
 #set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall -Wextra -g -std=c99 -Wno-unused-result")
 #set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Wall -Wextra -Os -std=c99 -Wno-unused-result")
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Wall -Wextra -Os -std=gnu99 -Wno-unused-result")
 set(CMAKE_BUILD_TYPE Release)
 
 set(SRC ${PROJECT_SOURCE_DIR}/src)
