@@ -34,7 +34,7 @@ extern int optreset;
 volatile int loops = -1, loop = -1;
 volatile char stop = 0;
 
-void intHandler() {
+void intHandler(int sig) {
     loops = loop;
     stop = 1;
 }
