@@ -7,10 +7,10 @@
 #include <signal.h>
 #include <sys/ioctl.h>
 
-#define USAGE "Usage: catimg [-hct] [-w width | -H height] [-l loops] [-r resolution] image-file\n\n" \
+#define USAGE "Usage: catimg [-hct] [-w width] [-H height] [-l loops] [-r resolution] image-file\n\n" \
   "  -h: Displays this message\n"                                      \
-  "  -w: Terminal width/columns by default\n"                           \
-  "  -H: Terminal height/row by default\n"                           \
+  "  -w: Maximal image width in columns. By default set to the terminal width\n"                           \
+  "  -H: Maximal image height in lines. By default set to the terminal height\n"                           \
   "  -l: Loops are only useful with GIF files. A value of 1 means that the GIF will " \
   "be displayed twice because it loops once. A negative value means infinite " \
   "looping\n"                                                           \
@@ -18,8 +18,6 @@
   "use higher resolution\n" \
   "  -c: Convert colors to a restricted palette\n" \
   "  -t: Disables true color (24-bit) support, falling back to 256 color\n"
-
-#define ERR_WIDTH_OR_HEIGHT "[ERROR] '-w' and '-H' can't be used at the same time\n\n"
 
 // Transparency threshold -- all pixels with alpha below 25%.
 #define TRANSP_ALPHA 64
@@ -72,33 +70,17 @@ int main(int argc, char *argv[])
     opterr = 0;
 
     uint32_t cols = 0, rows = 0, precision = 0;
-    uint32_t max_cols = 0, max_rows = 0;
     uint8_t convert = 0;
     uint8_t true_color = 1;
-    uint8_t adjust_to_height = 0, adjust_to_width = 0;
     float scale_cols = 0, scale_rows = 0;
 
     while ((c = getopt (argc, argv, "H:w:l:r:hct")) != -1)
         switch (c) {
             case 'H':
                 rows = strtol(optarg, &num, 0);
-                if (adjust_to_width) {
-                    // only either adjust to width or adjust to height is allowed, but not both.
-                    printf(ERR_WIDTH_OR_HEIGHT);
-                    printf(USAGE);
-                    exit(1);
-                }
-                adjust_to_height = 1;
                 break;
             case 'w':
-                cols = strtol(optarg, &num, 0) >> 1;
-                if (adjust_to_height) {
-                    // only either adjust to width or adjust to height is allowed, but not both.
-                    printf(ERR_WIDTH_OR_HEIGHT);
-                    printf(USAGE);
-                    exit(1);
-                }
-                adjust_to_width = 1;
+                cols = strtol(optarg, &num, 0);
                 break;
             case 'l':
                 loops = strtol(optarg, &num, 0);
@@ -136,29 +118,33 @@ int main(int argc, char *argv[])
             precision = 1;
     }
 
-    // if precision is 2 we can use the terminal full width/height. Otherwise we can only use half
-    max_cols = terminal_columns() / (2 / precision);
-    max_rows = terminal_rows() * precision;
+    if (cols == 0) {
+        cols = terminal_columns();
+    }
+    if (rows == 0) {
+        rows = terminal_rows();
+    }
+
+    // if precision is 2 we can use the terminal full width, otherwise we can only use half
+    cols = cols * precision / 2;
+    rows = rows * precision;
 
     if (strcmp(file, "-") == 0) {
         img_load_from_stdin(&img);
     } else {
         img_load_from_file(&img, file);
     }
-    if (cols == 0 && rows == 0) {
-        scale_cols = max_cols / (float)img.width;
-        scale_rows = max_rows / (float)img.height;
-        if (adjust_to_height && scale_rows < scale_cols && max_rows < img.height)
-            // rows == 0 and adjust_to_height > adjust to height instead of width
-            img_resize(&img, scale_rows, scale_rows);
-        else if (max_cols < img.width)
+    scale_cols = cols / (float)img.width;
+    scale_rows = rows / (float)img.height;
+
+    if (scale_cols < scale_rows) {
+        if (scale_cols < 1) {
             img_resize(&img, scale_cols, scale_cols);
-    } else if (cols > 0 && cols < img.width) {
-        scale_cols = cols / (float)img.width;
-        img_resize(&img, scale_cols, scale_cols);
-     } else if (rows > 0 && rows < img.height) {
-        scale_rows = rows / (float)img.height;
-        img_resize(&img, scale_rows, scale_rows);
+        }
+    } else {
+        if (scale_rows < 1) {
+            img_resize(&img, scale_rows, scale_rows);
+        }
     }
 
     if (convert)
