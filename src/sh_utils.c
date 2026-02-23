@@ -1,3 +1,4 @@
+#define _DEFAULT_SOURCE
 #include "sh_utils.h"
 
 #ifdef WINDOWS
@@ -21,10 +22,11 @@ uint32_t terminal_columns()
         CONSOLE_SCREEN_BUFFER_INFO csbi;
         int ret;
         ret = GetConsoleScreenBufferInfo(GetStdHandle( STD_OUTPUT_HANDLE ),&csbi);
-        return ret?csbi.dwSize.X:0;
+        return ret?csbi.dwSize.X:80;
 #else
         struct winsize win;
-        ioctl(1, TIOCGWINSZ, &win);
+        if (ioctl(1, TIOCGWINSZ, &win) == -1 || win.ws_col == 0)
+            return 80;
         return win.ws_col;
 #endif
 }
@@ -35,10 +37,11 @@ uint32_t terminal_rows()
         CONSOLE_SCREEN_BUFFER_INFO csbi;
         int ret;
         ret = GetConsoleScreenBufferInfo(GetStdHandle( STD_OUTPUT_HANDLE ),&csbi);
-        return ret?csbi.dwSize.Y:0;
+        return ret?csbi.dwSize.Y:24;
 #else
         struct winsize win;
-        ioctl(1, TIOCGWINSZ, &win);
+        if (ioctl(1, TIOCGWINSZ, &win) == -1 || win.ws_row == 0)
+            return 24;
         return win.ws_row;
 #endif
 }

@@ -1,5 +1,6 @@
 #include "sh_image.h"
 #include "sh_utils.h"
+#include <string.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include <stdlib.h>

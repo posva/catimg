@@ -1,3 +1,4 @@
+#define _DEFAULT_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -145,6 +146,7 @@ int main(int argc, char *argv[])
     } else {
         img_load_from_file(&img, file);
     }
+
     if (cols == 0 && rows == 0) {
         scale_cols = max_cols / (float)img.width;
         scale_rows = max_rows / (float)img.height;
