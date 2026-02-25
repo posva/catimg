@@ -106,6 +106,46 @@ STBIDEF unsigned char *stbi_xload(char const *filename, int *x, int *y, int *fra
 
         result = stbi__xload_main(&s, x, y, frames, channels);
 
+        if (!result) {
+            // Try to detect YUYV raw format based on file size
+            fseek(f, 0, SEEK_END);
+            long size = ftell(f);
+            fseek(f, 0, SEEK_SET);
+
+            int w = 0, h = 0;
+            if (size == 800 * 600 * 2) { w = 800; h = 600; }
+            else if (size == 640 * 480 * 2) { w = 640; h = 480; }
+            else if (size == 320 * 240 * 2) { w = 320; h = 240; }
+            else if (size == 160 * 120 * 2) { w = 160; h = 120; }
+            else if (size == 1280 * 720 * 2) { w = 1280; h = 720; }
+            else if (size == 1920 * 1080 * 2) { w = 1920; h = 1080; }
+
+            if (w > 0) {
+                unsigned char *yuyv = (unsigned char *)malloc(size);
+                if (yuyv && fread(yuyv, 1, size, f) == (size_t)size) {
+                    result = (unsigned char *)malloc(w * h * 3);
+                    if (result) {
+                        *x = w; *y = h; *channels = 3; *frames = 1;
+                        for (int i = 0, j = 0; i < size; i += 4, j += 6) {
+                            int y0 = yuyv[i];
+                            int u  = yuyv[i+1] - 128;
+                            int y1 = yuyv[i+2];
+                            int v  = yuyv[i+3] - 128;
+
+                            #define CLAMP(x) ((x) < 0 ? 0 : ((x) > 255 ? 255 : (x)))
+                            result[j]   = CLAMP(y0 + 1.402 * v);
+                            result[j+1] = CLAMP(y0 - 0.344136 * u - 0.714136 * v);
+                            result[j+2] = CLAMP(y0 + 1.772 * u);
+                            result[j+3] = CLAMP(y1 + 1.402 * v);
+                            result[j+4] = CLAMP(y1 - 0.344136 * u - 0.714136 * v);
+                            result[j+5] = CLAMP(y1 + 1.772 * u);
+                        }
+                    }
+                }
+                free(yuyv);
+            }
+        }
+
         fclose(f);
 
         return result;
@@ -192,7 +232,7 @@ void img_load_from_data(image_t *img, stbi_uc* ptr, int w, int h, int frames, in
 
                 stbi_image_free(ptr);
         } else {
-                perror("stb_image error");
+                fprintf(stderr, "stb_image error: %s\n", stbi_failure_reason());
                 exit(1);
         }
 }
