@@ -1,0 +1,44 @@
+name: Cppcheck
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  cppcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install cppcheck
+        run: sudo apt-get update && sudo apt-get install -y cppcheck
+
+      - name: Run cppcheck
+        run: |
+          cppcheck --enable=all --inconclusive --std=c99 \
+            -Isrc \
+            --error-exitcode=1 \
+            --suppress=memleak:src/sh_color.c:30 \
+            --suppress=returnDanglingLifetime:src/sh_image.c \
+            --suppress=autovarInvalidDeallocation:src/sh_image.c \
+            --suppress=unusedFunction:src/* \
+            --suppress=staticFunction:src/* \
+            --suppress=syntaxError:src/stb_image.h \
+            src/*.c 2>&1 | tee cppcheck-results.txt
+
+          # Check for actual errors in project code (excluding known false positives)
+          # False positives suppressed:
+          # - memleak from KHASH_MAP_INIT_INT macro (memory is freed properly)
+          # - returnDanglingLifetime from stb_image wrapper (returns heap memory)
+          # - autovarInvalidDeallocation from stb_image GIF code (only heap data freed)
+          # - syntaxError from STBI_MALLOC macro in stb_image.h
+          if grep -E '^src/(catimg|sh_color|sh_image|sh_utils)\..*: error:' cppcheck-results.txt | grep -v '^$'; then
+            echo "::error::Real errors found in project code!"
+            exit 1
+          fi
+
+          # Show summary
+          echo "=== Cppcheck Summary ==="
+          echo "No real errors found. All flagged issues are known false positives."

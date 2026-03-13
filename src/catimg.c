@@ -35,14 +35,13 @@ extern int optreset;
 volatile int loops = -1, loop = -1;
 volatile char stop = 0;
 
-void intHandler(int sig) {
+static void intHandler(int sig) {
+    (void)sig;
     loops = loop;
     stop = 1;
 }
 
-int getopt(int argc, char * const argv[], const char *optstring);
-
-uint32_t pixelToInt(const color_t *pixel) {
+static uint32_t pixelToInt(const color_t *pixel) {
     if (pixel->a == 0)
         return 0xffff;
     else if (pixel->r == pixel->g && pixel->g == pixel->b)
@@ -53,7 +52,7 @@ uint32_t pixelToInt(const color_t *pixel) {
                 + (pixel->b*5)/255);
 }
 
-char supportsUTF8() {
+static char supportsUTF8() {
     const char* LC_ALL = getenv("LC_ALL");
     const char* LANG = getenv("LANG");
     const char* LC_CTYPE = getenv("LC_CTYPE");
@@ -85,8 +84,8 @@ int main(int argc, char *argv[])
                 rows = strtol(optarg, &num, 0);
                 if (adjust_to_width) {
                     // only either adjust to width or adjust to height is allowed, but not both.
-                    printf(ERR_WIDTH_OR_HEIGHT);
-                    printf(USAGE);
+                    fputs(ERR_WIDTH_OR_HEIGHT, stdout);
+                    fputs(USAGE, stdout);
                     exit(1);
                 }
                 adjust_to_height = 1;
@@ -95,8 +94,8 @@ int main(int argc, char *argv[])
                 cols = strtol(optarg, &num, 0) >> 1;
                 if (adjust_to_height) {
                     // only either adjust to width or adjust to height is allowed, but not both.
-                    printf(ERR_WIDTH_OR_HEIGHT);
-                    printf(USAGE);
+                    fputs(ERR_WIDTH_OR_HEIGHT, stdout);
+                    fputs(USAGE, stdout);
                     exit(1);
                 }
                 adjust_to_width = 1;
@@ -108,7 +107,7 @@ int main(int argc, char *argv[])
                 precision = strtol(optarg, &num, 0);
                 break;
             case 'h':
-                printf(USAGE);
+                fputs(USAGE, stdout);
                 exit(0);
                 break;
             case 'c':
@@ -118,7 +117,7 @@ int main(int argc, char *argv[])
                 true_color = 0;
                 break;
             default:
-                printf(USAGE);
+                fputs(USAGE, stdout);
                 exit(1);
                 break;
         }
@@ -126,7 +125,7 @@ int main(int argc, char *argv[])
     if (argc > 1)
         file = argv[argc-1];
     else {
-        printf(USAGE);
+        fputs(USAGE, stdout);
         exit(1);
     }
 
@@ -168,7 +167,9 @@ int main(int argc, char *argv[])
     /*printf("Loaded %s: %ux%u. Console width: %u\n", file, img.width, img.height, cols);*/
     // For GIF
     if (img.frames > 1) {
-        system("clear");
+        // Use ANSI escape instead of system() for security
+        fputs("\033[2J\033[H", stdout);
+        fflush(stdout);
         signal(SIGINT, intHandler);
     } else {
         loops = 0;
