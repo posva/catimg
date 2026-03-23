@@ -168,8 +168,9 @@ int main(int argc, char *argv[])
     /*printf("Loaded %s: %ux%u. Console width: %u\n", file, img.width, img.height, cols);*/
     // For GIF
     if (img.frames > 1) {
-        system("clear");
-        signal(SIGINT, intHandler);
+      // switch to the alternate screen and place cursor at top left
+      printf("\e[?1049h\e[H");
+      signal(SIGINT, intHandler);
     } else {
         loops = 0;
     }
@@ -245,6 +246,10 @@ int main(int argc, char *argv[])
             offset += img.width * img.height;
             if (stop) frame = img.frames;
         }
+    }
+    if (img.frames > 1) {
+        // switch from the alternate screen
+        printf("\e[?1049l");
     }
     // Display the cursor again
     printf("\e[?25h");
