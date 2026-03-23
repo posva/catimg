@@ -168,9 +168,9 @@ int main(int argc, char *argv[])
     /*printf("Loaded %s: %ux%u. Console width: %u\n", file, img.width, img.height, cols);*/
     // For GIF
     if (img.frames > 1) {
-      // switch to the alternate screen and place cursor at top left
-      printf("\e[?1049h\e[H");
-      signal(SIGINT, intHandler);
+        // switch to the alternate screen and place cursor at top left
+        printf("\e[?1049h\e[H");
+        signal(SIGINT, intHandler);
     } else {
         loops = 0;
     }
