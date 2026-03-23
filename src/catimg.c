@@ -240,8 +240,12 @@ int main(int argc, char *argv[])
                                 printf("\e[48;5;%um  ", fgCol);
                     }
                 }
-                printf("\e[m\n");
+                printf("\e[m");
+                if (y + precision < img.height) {
+                  printf("\n");
+                }
             }
+            fflush(stdout);
             offset += img.width * img.height;
             if (stop) frame = img.frames;
         }
