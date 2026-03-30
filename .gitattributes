@@ -1,2 +1,10 @@
 src/*.h linguist-language=C
 src/*.c linguist-language=C
+
+# Binary image files
+*.png binary
+*.gif binary
+*.ico binary
+*.jpg binary
+*.jpeg binary
+*.bmp binary
