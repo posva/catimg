@@ -35,14 +35,13 @@ extern int optreset;
 volatile int loops = -1, loop = -1;
 volatile char stop = 0;
 
-void intHandler(int sig) {
+static void intHandler(int sig) {
+    (void)sig;
     loops = loop;
     stop = 1;
 }
 
-int getopt(int argc, char * const argv[], const char *optstring);
-
-uint32_t pixelToInt(const color_t *pixel) {
+static uint32_t pixelToInt(const color_t *pixel) {
     if (pixel->a == 0)
         return 0xffff;
     else if (pixel->r == pixel->g && pixel->g == pixel->b)
@@ -53,7 +52,7 @@ uint32_t pixelToInt(const color_t *pixel) {
                 + (pixel->b*5)/255);
 }
 
-char supportsUTF8() {
+static char supportsUTF8() {
     const char* LC_ALL = getenv("LC_ALL");
     const char* LANG = getenv("LANG");
     const char* LC_CTYPE = getenv("LC_CTYPE");

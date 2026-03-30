@@ -160,31 +160,31 @@ STBIDEF unsigned char *stbi_xload_from_memory(stbi_uc *buffer, int len, int *x, 
         return stbi__xload_main(&s, x, y, frames, channels);
 }
 
-void setPixelGray(color_t *pixel, unsigned char* ptr) {
+static void setPixelGray(color_t *pixel, unsigned char* ptr) {
         pixel->r = pixel->g = pixel->b = ptr[0];
         pixel->a = 255;
 }
 
-void setPixelGrayAlpha(color_t *pixel, unsigned char* ptr) {
+static void setPixelGrayAlpha(color_t *pixel, unsigned char* ptr) {
         pixel->r = pixel->g = pixel->b = ptr[0];
         pixel->a = ptr[1];
 }
 
-void setPixelRGB(color_t *pixel, unsigned char* ptr) {
+static void setPixelRGB(color_t *pixel, unsigned char* ptr) {
         pixel->r = ptr[0];
         pixel->g = ptr[1];
         pixel->b = ptr[2];
         pixel->a = 255;
 }
 
-void setPixelRGBAlpha(color_t *pixel, unsigned char* ptr) {
+static void setPixelRGBAlpha(color_t *pixel, unsigned char* ptr) {
         pixel->r = ptr[0];
         pixel->g = ptr[1];
         pixel->b = ptr[2];
         pixel->a = ptr[3];
 }
 
-void img_load_from_data(image_t *img, stbi_uc* ptr, int w, int h, int frames, int channels) {
+static void img_load_from_data(image_t *img, stbi_uc* ptr, int w, int h, int frames, int channels) {
         if (ptr && w && h) {
                 img->width = w;
                 /*h *= 3;*/
