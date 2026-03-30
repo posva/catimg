@@ -249,8 +249,10 @@ int main(int argc, char *argv[])
             offset += img.width * img.height;
             if (stop) frame = img.frames;
         }
-        printf("\n");
-        fflush(stdout);
+        if (!(loop < loops || loops < 0)) {
+            printf("\n");
+            fflush(stdout);
+        }
     }
     // Display the cursor again
     printf("\e[?25h");
