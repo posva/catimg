@@ -249,13 +249,9 @@ int main(int argc, char *argv[])
             offset += img.width * img.height;
             if (stop) frame = img.frames;
         }
-        if (!(loop < loops || loops < 0)) {
-            printf("\n");
-            fflush(stdout);
-        }
     }
     // Display the cursor again
-    printf("\e[?25h");
+    printf("\n\e[?25h");
 
     img_free(&img);
     free_hash_colors();
