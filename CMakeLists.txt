@@ -40,8 +40,15 @@ install(FILES ${PROJECT_SOURCE_DIR}/man/catimg.1
 target_link_libraries(catimg m)
 
 # tests
-#enable_testing()
-#add_test(tcatimg ${PROJECT_SOURCE_DIR}/tests/tcatimg.sh)
+enable_testing()
+add_executable(test_catimg
+  tests/test_catimg.c
+  ${SRC}/sh_color.c
+  ${SRC}/sh_image.c
+  ${SRC}/sh_utils.c
+)
+target_link_libraries(test_catimg m)
+add_test(NAME test_catimg COMMAND test_catimg WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 
 # Doc
 find_package(Doxygen)
