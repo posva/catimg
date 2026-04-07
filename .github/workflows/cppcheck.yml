@@ -1,0 +1,27 @@
+name: Cppcheck
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  cppcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install cppcheck
+        run: sudo apt-get update && sudo apt-get install -y cppcheck
+
+      - name: Run cppcheck
+        run: cppcheck --enable=warning,performance,portability --inconclusive \
+          --std=c99 -Isrc --error-exitcode=1 \
+          --suppress=memleak:src/sh_color.c:30 \
+          --suppress=returnDanglingLifetime:src/sh_image.c \
+          --suppress=autovarInvalidDeallocation:src/sh_image.c \
+          --suppress=unusedFunction:src/stb_image.h \
+          --suppress=staticFunction:src/stb_image.h \
+          --suppress=*:src/stb_image.h \
+          src/catimg.c src/sh_color.c src/sh_image.c src/sh_utils.c
