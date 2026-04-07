@@ -1,28 +1,15 @@
-.TH CATIMG "1" "April 2026" "catimg" "User Commands"
+.TH CATIMG "1" "2026-04-07" "catimg" "General Commands Manual"
 
 .SH NAME
-catimg \- render images in a terminal
+catimg \- fast image printing in to your terminal
 
 .SH SYNOPSIS
 .B catimg
-[\fB\-hct\fR]
-[\fB\-w\fR \fIwidth\fR | \fB\-H\fR \fIheight\fR]
-[\fB\-l\fR \fIloops\fR]
-[\fB\-r\fR \fIresolution\fR]
-\fIimage-file\fR
-
-.br
-.B catimg
-[\fB\-hct\fR]
-[\fB\-w\fR \fIwidth\fR | \fB\-H\fR \fIheight\fR]
-[\fB\-l\fR \fIloops\fR]
-[\fB\-r\fR \fIresolution\fR]
-\-
+[\fB-hct\fP] [\fB-w width\fP | \fB-H height\fP] [\fB-l loops\fP] [\fB-r resolution\fP] image
 
 .SH DESCRIPTION
 .B catimg
-prints images directly in terminals using ANSI escape sequences.
-For animated GIFs, it replays frames with their source delays.
+is a little program written in C with no dependencies that prints images in the terminal. It supports JPEG, PNG and GIF formats.
 Input may be a file path or
 .B \-
 to read image data from standard input.
@@ -30,42 +17,37 @@ to read image data from standard input.
 .SH OPTIONS
 .TP
 \fB\-c\fR
-Convert colors to a restricted palette before rendering.
-Useful on terminals with limited color support.
+Coerce colors to a restricted palette. Allows terminals with limited color support to render a more accurate version of the image than if it was directly done by the terminal itself.
 .TP
 \fB\-h\fR
-Show usage information and exit.
+Prints a help message
 .TP
-\fB\-H\fR \fIheight\fR
-Scale output by image height.
+\fB\-H\fR HEIGHT
+Specify the height of the displayed image, passing '0' will use terminal height.
 Cannot be used together with
 .BR \-w .
 .TP
-\fB\-l\fR \fIloops\fR
-Number of GIF loop repeats.
-A value of 1 displays the animation twice.
-A negative value means infinite looping.
-Ignored for non-animated images.
+\fB\-l\fR LOOPS
+Specify the amount of loops that catimg should repeat a GIF. A value of 1 means that the GIF will be displayed twice. A negative value implies infinity.
 .TP
-\fB\-r\fR \fIresolution\fR
-Rendering precision: 1 or 2.
-If omitted, precision is auto-detected from locale UTF-8 support.
+\fB\-r\fR RESOLUTION
+Possible values 1 or 2. Force the resolution of the image. By default catimg will check if rendering in higher resolution is possible and do so or use the lower one.
 .TP
 \fB\-t\fR
-Disable true color (24-bit), falling back to 256-color output.
+Disables true color (24-bit) support, falling back to 256 color escape codes instead.
 .TP
-\fB\-w\fR \fIwidth\fR
-Scale output by image width.
+\fB\-w\fR WIDTH
+Specify the width of the displayed image. When not provided, catimg will use the terminal width.
 Cannot be used together with
 .BR \-H .
 
-.SH ARGUMENTS
+.SH EXIT STATUS
 .TP
-\fIimage-file\fR
-Path to an image file to render.
-Use
-.B \-
-to read encoded image data from standard input.
+.B 0
+Success.
+.TP
+.B 1
+Invalid arguments or image loading/rendering failure.
 
 .SH ENVIRONMENT
 .B catimg
@@ -77,14 +59,6 @@ and
 for the substring
 .B UTF-8
 when auto-selecting precision.
-
-.SH EXIT STATUS
-.TP
-.B 0
-Success.
-.TP
-.B 1
-Invalid arguments or image loading/rendering failure.
 
 .SH EXAMPLES
 .TP
@@ -101,13 +75,9 @@ Read from standard input:
 \fBcurl -s https://example.com/image.png | catimg -\fR
 
 .SH BUGS
-Please report bugs at:
-.br
-https://github.com/posva/catimg/issues
+Please report any bugs to https://github.com/posva/catimg/issues.
 
 .SH AUTHORS
-catimg was written by Eduardo San Martin Morote.
-.br
-This manual page was originally written by Jonathan Carter,
-Eduardo San Martin Morote, and Thomas Kupper, and later updated
-to match current command behavior.
+catimg was written by Eduardo San Martin Morote (https://github.com/posva)
+.LP
+This manual page was written by Jonathan Carter <jcarter@linux.com>, Eduardo San Martin Morote and Thomas Kupper
