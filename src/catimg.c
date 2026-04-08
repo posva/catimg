@@ -240,8 +240,12 @@ int main(int argc, char *argv[])
                                 printf("\e[48;5;%um  ", fgCol);
                     }
                 }
-                printf("\e[m\n");
+                printf("\e[m");
+                if (y + precision < img.height) {
+                  printf("\n");
+                }
             }
+            fflush(stdout);
             offset += img.width * img.height;
             if (stop) frame = img.frames;
         }
@@ -251,7 +255,7 @@ int main(int argc, char *argv[])
         printf("\e[?1049l");
     }
     // Display the cursor again
-    printf("\e[?25h");
+    printf("\n\e[?25h");
 
     img_free(&img);
     free_hash_colors();
