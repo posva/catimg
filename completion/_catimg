@@ -44,6 +44,7 @@ _arguments \
   '-r[force the resolution of the image]: :->resolution' \
   '-t[disable true color and use 256 color instead]' \
   '-w[specify the width of the displayed image]' \
+  '-a[specify the aspect ratio multiplier of the font]' \
   '*: :_files' && ret=0
 
 [[ "$state" == 'resolution' ]] && _values 'resolution value' 1 2 && ret=0
