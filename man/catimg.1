@@ -5,7 +5,9 @@ catimg \- fast image printing in to your terminal
 
 .SH SYNOPSIS
 .B catimg
-[\fB-hct\fP] [\fB-w width\fP | \fB-H height\fP] [\fB-l loops\fP] [\fB-r resolution\fP] image
+[\fB-ahct\fP] [\fB-w width\fP | \fB-H height\fP]
+[\fB-C cols\fP] [\fB-R rows\fP]
+[\fB-l loops\fP] [\fB-r resolution\fP] image
 
 .SH DESCRIPTION
 .B catimg
@@ -16,8 +18,30 @@ to read image data from standard input.
 
 .SH OPTIONS
 .TP
+\fB\-a\fR
+Auto-sizes the image to fit within the terminal dimensions if the values
+specified by
+.BR \-C ,
+.BR \-H ,
+.BR \-R ,
+or
+.BR \-w
+would otherwise produce an image that is too large. When not using other
+sizing options, the aspect ratio of the image will determine whether the
+terminal height or width is used as the limiting dimension.
+.TP
 \fB\-c\fR
 Coerce colors to a restricted palette. Allows terminals with limited color support to render a more accurate version of the image than if it was directly done by the terminal itself.
+.TP
+\fB\-C\fR COLS
+Specify the maximum width of the image as terminal columns. Unlike
+.BR \-w ,
+the column count is not impacted by
+.BR \-r .
+When used with
+.BR \-R
+the image is scaled to fit within the provided dimensions while maintaining its
+original aspect ratio.
 .TP
 \fB\-h\fR
 Prints a help message
@@ -26,12 +50,29 @@ Prints a help message
 Specify the height of the displayed image, passing '0' will use terminal height.
 Cannot be used together with
 .BR \-w .
+Setting
+.BR \-r
+may or may not impact the final output height. Use
+.BR \-R
+to set a fixed height, regardless of render resolution.
 .TP
 \fB\-l\fR LOOPS
-Specify the amount of loops that catimg should repeat a GIF. A value of 1 means that the GIF will be displayed twice. A negative value implies infinity.
+Specify the amount of loops that
+.B catimg
+should repeat a GIF. A value of 1 means that the GIF will be displayed twice. A negative value implies infinity.
 .TP
 \fB\-r\fR RESOLUTION
 Possible values 1 or 2. Force the resolution of the image. By default catimg will check if rendering in higher resolution is possible and do so or use the lower one.
+.TP
+\fB\-R\fR ROWS
+Specify the maximum height of the image as terminal rows. Unlike
+.BR \-H ,
+the row count is not impacted by
+.BR \-r .
+When used with
+.BR \-C
+the image is scaled to fit within the provided dimensions while maintaining its
+original aspect ratio.
 .TP
 \fB\-t\fR
 Disables true color (24-bit) support, falling back to 256 color escape codes instead.
@@ -40,6 +81,11 @@ Disables true color (24-bit) support, falling back to 256 color escape codes ins
 Specify the width of the displayed image. When not provided, catimg will use the terminal width.
 Cannot be used together with
 .BR \-H .
+Setting
+.BR \-r
+may or may not impact the final output width. Use
+.BR \-C
+to set a fixed width, regardless of render resolution.
 
 .SH EXIT STATUS
 .TP
@@ -68,7 +114,11 @@ Render a local image:
 .TP
 Render with a fixed width:
 .br
-\fBcatimg -w 80\fR \fIphoto.jpg\fR
+\fBcatimg -C 80\fR \fIphoto.jpg\fR
+.TP
+Render with a fixed height unless the terminal is shorter than that height:
+.br
+\fBcatimg -R 60 -a\fR \fIphoto.jpg\fR
 .TP
 Read from standard input:
 .br
@@ -80,4 +130,5 @@ Please report any bugs to https://github.com/posva/catimg/issues.
 .SH AUTHORS
 catimg was written by Eduardo San Martin Morote (https://github.com/posva)
 .LP
-This manual page was written by Jonathan Carter <jcarter@linux.com>, Eduardo San Martin Morote and Thomas Kupper
+This manual page was written by Jonathan Carter <jcarter@linux.com>, Eduardo
+San Martin Morote, Thomas Kupper, and Jon Hohle <jon@ttkb.co>.

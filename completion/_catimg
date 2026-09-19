@@ -37,11 +37,14 @@ local context state state_descr line ret=1
 typeset -A val_args
 
 _arguments \
+  '-a[auto-size the image to fit terminal dimensions]' \
   '-c[convert colors to a restricted palette]' \
+  '-C[maximum image width in terminal columns]' \
   '-h[display a help message]' \
   '-H[specify the height of the displayed image]' \
   '-l[specify the amount of loops that catimg should repeat a GIF]' \
   '-r[force the resolution of the image]: :->resolution' \
+  '-R[maximum image height in terminal rows]' \
   '-t[disable true color and use 256 color instead]' \
   '-w[specify the width of the displayed image]' \
   '*: :_files' && ret=0

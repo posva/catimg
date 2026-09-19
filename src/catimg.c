@@ -1,4 +1,5 @@
 #define _DEFAULT_SOURCE
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,18 +13,25 @@
   "  -h: Displays this message\n"                                      \
   "  -w: Terminal width/columns by default\n"                           \
   "  -H: Terminal height/row by default\n"                           \
+  "  -C: Maximum image width in terminal columns\n"                  \
+  "  -R: Maximum image height in terminal rows\n"                    \
   "  -l: Loops are only useful with GIF files. A value of 1 means that the GIF will " \
   "be displayed twice because it loops once. A negative value means infinite " \
   "looping\n"                                                           \
   "  -r: Resolution must be 1 or 2. By default catimg checks for unicode support to " \
   "use higher resolution\n" \
   "  -c: Convert colors to a restricted palette\n" \
-  "  -t: Disables true color (24-bit) support, falling back to 256 color\n"
+  "  -t: Disables true color (24-bit) support, falling back to 256 color\n" \
+  "  -a: Auto-size the image to fit terminal dimensions, overriding -w, -H, -C, or -R\n"
 
 #define ERR_WIDTH_OR_HEIGHT "[ERROR] '-w' and '-H' can't be used at the same time\n\n"
+#define ERR_COL_NEGATIVE "[ERROR] '-C' can't be negative\n\n"
+#define ERR_ROW_NEGATIVE "[ERROR] '-R' can't be negative\n\n"
 
 // Transparency threshold -- all pixels with alpha below 25%.
 #define TRANSP_ALPHA 64
+
+#define EPSILON 0.00001
 
 extern char *optarg;
 extern int optind;
@@ -72,13 +80,16 @@ int main(int argc, char *argv[])
     opterr = 0;
 
     uint32_t cols = 0, rows = 0, precision = 0;
+    uint32_t tcols = 0, trows = 0;
     uint32_t max_cols = 0, max_rows = 0;
+    int32_t desired_cols = -1, desired_rows = -1;
     uint8_t convert = 0;
     uint8_t true_color = 1;
     uint8_t adjust_to_height = 0, adjust_to_width = 0;
-    float scale_cols = 0, scale_rows = 0;
+    uint8_t auto_size = 0;
+    float scale = 1.0, scale_cols = 0, scale_rows = 0;
 
-    while ((c = getopt (argc, argv, "H:w:l:r:hct")) != -1)
+    while ((c = getopt (argc, argv, "H:w:l:r:hctaC:R:")) != -1)
         switch (c) {
             case 'H':
                 rows = strtol(optarg, &num, 0);
@@ -116,6 +127,23 @@ int main(int argc, char *argv[])
             case 't':
                 true_color = 0;
                 break;
+            case 'C':
+                desired_cols = strtol(optarg, &num, 0);
+                if (desired_cols < 0) {
+                    fprintf(stderr, ERR_COL_NEGATIVE);
+                    exit(1);
+                }
+                break;
+            case 'R':
+                desired_rows = strtol(optarg, &num, 0);
+                if (desired_rows < 0) {
+                    fprintf(stderr, ERR_ROW_NEGATIVE);
+                    exit(1);
+                }
+                break;
+            case 'a':
+                auto_size = 1;
+                break;
             default:
                 printf(USAGE);
                 exit(1);
@@ -137,8 +165,18 @@ int main(int argc, char *argv[])
     }
 
     // if precision is 2 we can use the terminal full width/height. Otherwise we can only use half
-    max_cols = terminal_columns() / (2 / precision);
-    max_rows = terminal_rows() * precision;
+    tcols = terminal_columns();
+    trows = terminal_rows();
+    max_cols = (desired_cols < 0 || (auto_size && desired_cols > tcols))
+        ? tcols
+        : desired_cols;
+    max_rows = (desired_rows < 0 || (auto_size && desired_rows > trows))
+        ? trows
+        : desired_rows;
+    tcols /= (2 / precision);
+    trows  *= precision;
+    max_cols /= (2 / precision);
+    max_rows *= precision;
 
     if (strcmp(file, "-") == 0) {
         img_load_from_stdin(&img);
@@ -146,21 +184,39 @@ int main(int argc, char *argv[])
         img_load_from_file(&img, file);
     }
 
-    if (cols == 0 && rows == 0) {
+    if (desired_cols >= 0 && desired_rows >= 0) {
         scale_cols = max_cols / (float)img.width;
         scale_rows = max_rows / (float)img.height;
-        if (adjust_to_height && scale_rows < scale_cols && max_rows < img.height)
+        if (scale_rows < scale_cols)
+            scale = scale_rows;
+        else
+            scale = scale_cols;
+    } else if (desired_cols >= 0) {
+        scale = max_cols / (float)img.width;
+    } else if (desired_rows >= 0) {
+        scale = max_rows / (float)img.height;
+    } else if (cols == 0 && rows == 0) {
+        scale_cols = tcols / (float)img.width;
+        scale_rows = trows / (float)img.height;
+        if (adjust_to_height && scale_rows < scale_cols && trows < img.height)
             // rows == 0 and adjust_to_height > adjust to height instead of width
-            img_resize(&img, scale_rows, scale_rows);
-        else if (max_cols < img.width)
-            img_resize(&img, scale_cols, scale_cols);
+            scale = scale_rows;
+        else if (tcols < img.width)
+            scale = scale_cols;
     } else if (cols > 0 && cols < img.width) {
-        scale_cols = cols / (float)img.width;
-        img_resize(&img, scale_cols, scale_cols);
-     } else if (rows > 0 && rows < img.height) {
-        scale_rows = rows / (float)img.height;
-        img_resize(&img, scale_rows, scale_rows);
+        scale = cols / (float)img.width;
+    } else if (rows > 0 && rows < img.height) {
+        scale = rows / (float)img.height;
     }
+
+    if (auto_size) {
+        scale_cols = tcols / (float)img.width;
+        scale_rows = trows / (float)img.height;
+        scale = fmin(fmin(scale, scale_cols), scale_rows);
+    }
+
+    if (fabs(scale - 1.0) > EPSILON)
+        img_resize(&img, scale, scale);
 
     if (convert)
         img_convert_colors(&img);

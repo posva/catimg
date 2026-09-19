@@ -309,10 +309,19 @@ void img_resize(image_t *img, float wsc, float hsc)
         uint32_t w = img->width*wsc,
                  h = img->height*hsc,
                  wh;
+
+        if (w == 0 || h == 0) {
+            free(img->pixels);
+            img->pixels = NULL;
+            img->width = w;
+            img->height = h;
+            return;
+        }
+
         wsc = 1.f/wsc;
         hsc = 1.f/hsc;
-        int32_t wsc_i = wsc,
-                hsc_i = hsc;
+        int32_t wsc_i = fmax(wsc, 1.f),
+                hsc_i = fmax(hsc, 1.f);
         wh = hsc_i*wsc_i;
 
         if (!(pix = malloc(sizeof(color_t)*w*h * img->frames))) {
