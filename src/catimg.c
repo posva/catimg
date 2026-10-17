@@ -241,7 +241,7 @@ int main(int argc, char *argv[])
                     }
                 }
                 printf("\e[m");
-                if (y + precision < img.height) {
+                if (img.frames == 1 || y + precision < img.height) {
                   printf("\n");
                 }
             }
@@ -255,7 +255,7 @@ int main(int argc, char *argv[])
         printf("\e[?1049l");
     }
     // Display the cursor again
-    printf("\n\e[?25h");
+    printf("\e[?25h");
 
     img_free(&img);
     free_hash_colors();
