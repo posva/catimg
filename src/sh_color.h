@@ -35,7 +35,7 @@ typedef struct {
               v; ///< v
 } color_yuv_t;
 
-#define N_COLORS 247 ///< Number of colors in terminal
+#define N_COLORS 246 ///< Number of colors in terminal
 //uint32_t color_map[N_COLORS]; ///< palette of the terminal colors in RGB 0x00RRGGBB
 // yuv equivalents
 //color_yuv_t yuv_color_map[N_COLORS]; ///< palette of the terminal colors in YUV format

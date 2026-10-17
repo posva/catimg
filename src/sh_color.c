@@ -51,7 +51,7 @@ void free_hash_colors()
         kh_destroy(uint32_t, hash_colors);
 }
 
-uint32_t find_nearest_color(color_t *col)
+static uint32_t find_nearest_color(color_t *col)
 {
         color_yuv_t yuv;
         rgb2yuv(col, &yuv);

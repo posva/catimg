@@ -1,4 +1,4 @@
-.TH CATIMG "1" "June 2020" "catimg" "General Commands Manual"
+.TH CATIMG "1" "2026-04-07" "catimg" "General Commands Manual"
 
 .SH NAME
 catimg \- fast image printing in to your terminal
@@ -10,6 +10,9 @@ catimg \- fast image printing in to your terminal
 .SH DESCRIPTION
 .B catimg
 is a little program written in C with no dependencies that prints images in the terminal. It supports JPEG, PNG and GIF formats.
+Input may be a file path or
+.B \-
+to read image data from standard input.
 
 .SH OPTIONS
 .TP
@@ -21,6 +24,8 @@ Prints a help message
 .TP
 \fB\-H\fR HEIGHT
 Specify the height of the displayed image, passing '0' will use terminal height.
+Cannot be used together with
+.BR \-w .
 .TP
 \fB\-l\fR LOOPS
 Specify the amount of loops that catimg should repeat a GIF. A value of 1 means that the GIF will be displayed twice. A negative value implies infinity.
@@ -33,6 +38,41 @@ Disables true color (24-bit) support, falling back to 256 color escape codes ins
 .TP
 \fB\-w\fR WIDTH
 Specify the width of the displayed image. When not provided, catimg will use the terminal width.
+Cannot be used together with
+.BR \-H .
+
+.SH EXIT STATUS
+.TP
+.B 0
+Success.
+.TP
+.B 1
+Invalid arguments or image loading/rendering failure.
+
+.SH ENVIRONMENT
+.B catimg
+checks
+.BR LC_ALL ,
+.BR LANG ,
+and
+.B LC_CTYPE
+for the substring
+.B UTF-8
+when auto-selecting precision.
+
+.SH EXAMPLES
+.TP
+Render a local image:
+.br
+\fBcatimg\fR \fIphoto.png\fR
+.TP
+Render with a fixed width:
+.br
+\fBcatimg -w 80\fR \fIphoto.jpg\fR
+.TP
+Read from standard input:
+.br
+\fBcurl -s https://example.com/image.png | catimg -\fR
 
 .SH BUGS
 Please report any bugs to https://github.com/posva/catimg/issues.
