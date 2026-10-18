@@ -1,12 +1,12 @@
 # Catimg
 
-Renders images in the terminal.
+Renders images in the terminal using text.
 
 ![mewtwo](https://cloud.githubusercontent.com/assets/664177/10267523/f81296de-6a97-11e5-99d0-d2124bd6a9e3.png)
 
-`catimg` is a little program written in C with no dependencies that prints images in terminal.
-It supports JPEG, PNG and GIF formats. This program was originally a script that
-did the same by using ImageMagick `convert`.
+`catimg` is a little program written in C with no dependencies that prints images in the terminal.
+It supports JPeG, PNG, and GIF formats.  This program was originally a script that did the same by
+using ImageMagick's `convert` utility.
 
 ## Installation
 
@@ -20,6 +20,12 @@ Arch Linux
 
 ```sh
 yaourt -S catimg
+```
+
+Debian Linux / Ubuntu Linux
+
+```sh
+apt install catimg
 ```
 
 Fedora 25 and later
@@ -41,7 +47,7 @@ In order to use the script you need:
 
 - ImageMagick 6.6.0-4 2012-08-17 Q16 (Not tested with earlier versions)
 - shell with 256 colors support ( **change the** `#!/usr/bin/env bash` **by
-  yours**). In OS X you just have to update the bash version using
+  yours**).  In MacOS X you just have to update the bash version using
   [Homebrew](http://brew.sh/) (or any other method).
 
 ## Examples
@@ -50,7 +56,8 @@ In order to use the script you need:
 
 ## High Resolution vs Low Resolution
 
-By using unicode characters catimg will try to display pictures in higher resolution. You can force the resolution with the `-r` option.
+By using unicode characters catimg will try to display pictures in higher resolution.  You can
+force the resolution with the `-r` option.
 
 ![cats](https://cloud.githubusercontent.com/assets/664177/10267481/da74d106-6a96-11e5-937d-efd452e53170.png)
 ![catslow](https://cloud.githubusercontent.com/assets/664177/10267494/07464a48-6a97-11e5-813e-0645f56b4c4f.png)
@@ -62,8 +69,8 @@ slower.
 
 ## Contributing
 
-I'm open to any contributions that helps `catimg`! If you find bugs, please
-create an issue or do a pull request :smile:.
+I'm open to any contributions that helps `catimg`!  If you find any bugs, please
+create an issue or start a pull request :smile:.
 
 ## License
 
